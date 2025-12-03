@@ -1,0 +1,1317 @@
+[
+  {
+    "name": "Standard Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> Standard ammunition",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 0
+    }
+  },
+  {
+    "name": "Piercing Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>50%</> increased environment penetration",
+      "> <C>25%</> of damage dealt penetrates defense",
+      "> <C>25%</> increased velocity",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>25%</> <B>reduced damage on deflections</>",
+      "<B>></> <C>25%</> <B>reduced bleed damage</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 20
+    }
+  },
+  {
+    "name": "Heavy Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>0.25-2 s</> snare to enemies, scaling proportionally with damage dealt from <C>10-100</>",
+      "> <C>100%</> increased near damage range",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>15%</> <B>reduced velocity</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 10
+    }
+  },
+  {
+    "name": "Shred Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>50%</> increased bleed damage",
+      "> Bypasses limb damage reduction on targets with depleted defense",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>15%</> <B>reduced environment penetration</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 15
+    }
+  },
+  {
+    "name": "TD Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> Unaffected by Core slowing effects while Core active",
+      "> Bypasses temporal damage reductions",
+      "> <C>15%</> increased Core generation",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>25%</> <B>reduced far damage range</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 5
+    }
+  },
+  {
+    "name": "CB Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>50%</> of headshot damage dealt as additional vital damage after <C>1 s</>",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>15%</> <B>reduced velocity</>",
+      "<B>></> <C>25%</> <B>reduced far damage range</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 35
+    }
+  },
+  {
+    "name": "Chem Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>2 s</> corrode to enemies",
+      "> <C>15%</> of damage dealt penetrates defense",
+      "> <C>50%</> of damage dealt reduces enemy max vitals + defense",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>15%</> <B>reduced damage to penetration immune enemies</>",
+      "<B>></> <C>50%</> <B>reduced bleed damage</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 35
+    }
+  },
+  {
+    "name": "EM Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>1-4 s</> disable to enemies, scaling proportionally with damage dealt from <C>50-200</>",
+      "> <C>25%</> increased damage to stunned enemies",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>25%</> <B>reduced velocity + environment penetration</>",
+      "<B>></> <C>50%</> <B>reduced bleed damage</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Incendiary Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>50%</> of damage dealt as additional fire damage",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>25%</> <B>reduced  damage</>",
+      "<B>></> <C>100%</> <B>reduced bleed damage</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 45
+    }
+  },
+  {
+    "name": "Target Painter",
+    "type": "Optic",
+    "tooltip": [
+      "> Paints visible enemies while aiming",
+      "<B>> Unable to use primary aim stance</>",
+      "<B>></> <C>25%</> <B>increased aim time</>",
+      "<B>></> <C>25%</> <B>increased spread</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 25
+    }
+  },
+  {
+    "name": "T-Lock Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> Can lock onto + track painted enemies",
+      "> Additional explosive damage after <C>2 s</>",
+      "> <C>25 m/s</> velocity with lock, <C>250 m/s</> without lock",
+      "> <C>1.5x</> headshot mutliplier",
+      "> <C>25</> penetration",
+      "> <C>25%</> reduced recoil",
+      "<B>></> <C>85%</> <B>reduced direct damage</>",
+      "<B>></> <C>25%</> <B>reduced automatic + burst RPM</>",
+      "<B>> Overrides weapon modifiers to velocity, damage range, headshot multiplier + penetration</>",
+      "<B>> Can be disabled</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Ghostfire Ammo",
+    "type": "Ammo",
+    "tooltip": [
+      "> <C>100%</> defense bypass",
+      "> <C>100%</> increased ricochets + reduced ricochet damage penalty",
+      "> <C>100%</> reduced damage to self + allies",
+      "> Hot mag: <C>25%</> additional environment penetration + velocity",
+      "<B>></> <C>50%</> <B>reduced damage</>",
+      "<B>></> <C>100%</> <B>reduced environment penetration</>",
+      "<B>></> <C>100%</> <B>reduced bleed damage</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 35
+    }
+  },
+  {
+    "name": "Standard Grenade",
+    "type": "Ammo",
+    "tooltip": [
+      "> Activates on impact, <C>1 s</> activation delay",
+      "> Explosive damage",
+      "> Can knockback",
+      "> Hot mag: <C>25%</> additional velocity",
+      "<B>> Can be disabled</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 35
+    }
+  },
+  {
+    "name": "Impact Grenade",
+    "type": "Ammo",
+    "tooltip": [
+      "> Detonates on impact",
+      "> Explosive damage",
+      "> <C>25%</> increased velocity",
+      "> Hot mag: <C>25%</> additional velocity",
+      "<B>></> <C>50%</> <B>reduced explosive damage</>",
+      "<B>></> <C>25%</> <B>reduced explosive damage radius</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 45
+    }
+  },
+  {
+    "name": "Incendiary Grenade",
+    "type": "Ammo",
+    "tooltip": [
+      "> Activates on impact, <C>0.75 s</> activation delay",
+      "> Fire damage, ignites surrounding area, <C>2 s</> snare",
+      "> Hot mag: <C>25%</> additional velocity",
+      "<B>></> <C>75%</> <B>reduced explosive damage</>"
+    ],
+    "technician": "true",
+    "compatibility": [
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 40
+    }
+  },
+  {
+    "name": "Proximity Grenade",
+    "type": "Ammo",
+    "tooltip": [
+      "> Proximity detection, <C>0.75 s</> activation delay",
+      "> Can attach to surfaces + Shells",
+      "> Explosive damage",
+      "> Hot mag: <C>25%</> additional velocity",
+      "<B>></> <C>25%</> <B>reduced explosive damage</>",
+      "<B>> Can be disabled</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 35
+    }
+  },
+  {
+    "name": "Laser Sight",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>50%</> reduced hipfire + alternate aim spread",
+      "> <C>25%</> reduced hipfire + alternate aim spread gain",
+      "> <C>25%</> reduced akimbo spread + akimbo spread gain",
+      "<B>> Visible laser</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 20
+    }
+  },
+  {
+    "name": "Suppressor",
+    "type": "Mod",
+    "tooltip": [
+      "> Removes radar profile from firing",
+      "> Tracers no longer visible to enemies while using non-exotic ammo types",
+      "> <C>50%</> reduced vertical recoil",
+      "<B>></> <C>15%</> <B>reduced velocity</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 30
+    }
+  },
+  {
+    "name": "Foregrip",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>50%</> reduced horizontal recoil",
+      "> <C>25%</> reduced aim time",
+      "<B>></> <C>0.15 m/s</> <B>increased speed penalty</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Sentinel",
+      "Nexus",
+      "Typhon"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 15
+    }
+  },
+  {
+    "name": "Secure Grip",
+    "type": "Mod",
+    "tooltip": [
+      "> Disarm immunity",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap",
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 10
+    }
+  },
+  {
+    "name": "Tactical Foregrip",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>25%</> increased rechamber speed",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Master-Key"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 30
+    }
+  },
+  {
+    "name": "Auto-Bolt",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>25%</> increased rechamber speed",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Vigil"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 45
+    }
+  },
+  {
+    "name": "Heavy Barrel",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>25%</> reduced vertical recoil",
+      "> <C>50%</> reduced spread gain",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 30
+    }
+  },
+  {
+    "name": "Long Barrel",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>50%</> increased velocity",
+      "> <C>25%</> reduced pellet spread",
+      "<B>></> <C>25%</> <B>increased aim time</>",
+      "<B>></> <C>25%</> <B>increased hipfire spread</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Cerberus"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 40
+    }
+  },
+  {
+    "name": "High Capacity",
+    "type": "Mod",
+    "tooltip": [
+      "> Increased ammo capacity",
+      "<B>></> <C>15%</> <B>increased aim time</>",
+      "<B>></> <C>0.15 m/s</> <B>increased speed penalty</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Geist",
+      "Custodian",
+      "Vigil",
+      "Sentinel",
+      "Nexus",
+      "Typhon",
+      "Omen"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 25
+    }
+  },
+  {
+    "name": "External Mag",
+    "type": "Mod",
+    "tooltip": [
+      "> Converts to magazine reload",
+      "> Increased ammo capacity",
+      "<B>></> <C>15%</> <B>increased aim time</>",
+      "<B>></> <C>0.15 m/s</> <B>increased speed penalty</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Master-Key",
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 30
+    }
+  },
+  {
+    "name": "Speed Loader",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>50%</> increased reload speed"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Deckard",
+      "Cerberus"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 35
+    }
+  },
+  {
+    "name": "Adaptive Choke",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>25%</> reduced pellet spread while ADS or akimbo alternate aim stance",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Master-Key",
+      "Cerberus",
+      "Typhon"
+    ],
+    "excludes": [
+      "Rifled Barrel"
+    ],
+    "foundations": {
+      "type": "tech",
+      "value": 30
+    }
+  },
+  {
+    "name": "Iron Sights",
+    "type": "Optic",
+    "tooltip": [
+      "> Iron sights"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 0
+    }
+  },
+  {
+    "name": "Marksman Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> <C>0.15x</> additional headshot damage multiplier",
+      "> <C>100%</> reduced ADS spread",
+      "> <C>100%</> increased ADS range",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Vigil",
+      "Sentinel",
+      "Nexus"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 25
+    }
+  },
+  {
+    "name": "Reflex Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> <C>25%</> reduced ADS spread"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 25
+    }
+  },
+  {
+    "name": "2x Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> <C>35%</> reduced ADS spread"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 20
+    }
+  },
+  {
+    "name": "3x Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> <C>65%</> reduced ADS spread",
+      "> <C>25%</> increased ADS range",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Deckard",
+      "Geist",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 15
+    }
+  },
+  {
+    "name": "4x Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> <C>85%</> reduced ADS spread",
+      "> <C>50%</> increased ADS range",
+      "<B>></> <C>15%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Deckard"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 30
+    }
+  },
+  {
+    "name": "2x TRG Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> Highlights enemies + devices",
+      "> <C>35%</> reduced ADS spread",
+      "<B>></> <C>25%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Inhibitor",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 25
+    }
+  },
+  {
+    "name": "4x TRG Sight",
+    "type": "Optic",
+    "tooltip": [
+      "> Highlights enemies + devices",
+      "> <C>85%</> reduced ADS spread",
+      "> <C>50%</> increased ADS range",
+      "<B>></> <C>25%</> <B>increased aim time</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Deckard"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 30
+    }
+  },
+  {
+    "name": "Light Trigger",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>25%</> increased RPM",
+      "<B>></> <C>50%</> <B>increased recoil + spread gain</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Deckard",
+      "Warrant"
+    ],
+    "excludes": [
+      "Wildfire Trigger",
+      "Burst Trigger"
+    ],
+    "foundations": {
+      "type": "hardware",
+      "value": 40
+    }
+  },
+  {
+    "name": "Automatic Trigger",
+    "type": "Mod",
+    "tooltip": [
+      "> Converts to automatic",
+      "> <C>20%</> increased RPM",
+      "<B>></> <C>25%</> <B>reduced damage</>",
+      "<B>></> <C>50%</> <B>increased recoil + spread gain</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Typhon"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 35
+    }
+  },
+  {
+    "name": "Contact charge",
+    "type": "Mod",
+    "tooltip": [
+      "> Detonates on drop or disarm",
+      "> Deals explosive damage to targets within <C>2-4 m</>",
+      "> <C>50-25</> damage with sidearms",
+      "> <C>75-25</> damage with primary weapons",
+      "> <C>100-25</> damage with heavy weapons",
+      "<B>></> <C>0.25 m/s</> <B>increased speed penalty</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap",
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 30
+    }
+  },
+  {
+    "name": "Burst Trigger",
+    "type": "Mod",
+    "tooltip": [
+      "> Converts to 2 round burst",
+      "> <C>300%</> increased RPM",
+      "<B>></> <C>100%</> <B>increased recoil</>",
+      "<B>></> <C>100%</> <B>increased hipfire spread</>",
+      "<B>></> <C>100%</> <B>increased spread gain</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Warrant"
+    ],
+    "excludes": [
+      "Light Trigger"
+    ],
+    "foundations": {
+      "type": "hardware",
+      "value": 45
+    }
+  },
+  {
+    "name": "Stabilizer",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>75%</> reduced recoil while ADS",
+      "> <C>15%</> reduced aim time",
+      "<B>></> <C>50%</> <B>reduced speed while ADS</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Nexus"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 45
+    }
+  },
+  {
+    "name": "Lightweight Frame",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>15%</> reduced aim time",
+      "> <C>50%</> reduced speed penalty",
+      "<B>></> <C>25%</> <B>increased recoil</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Deckard",
+      "Geist",
+      "Cerberus",
+      "Master-Key",
+      "Icarus",
+      "Custodian",
+      "Vigil",
+      "Inhibitor",
+      "Sentinel",
+      "Helix",
+      "Nexus",
+      "Typhon",
+      "Omen",
+      "Double-Tap",
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 25
+    }
+  },
+  {
+    "name": "HV Barrel",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>25%</> increased velocity",
+      "<B>></> <C>0.25 m/s</> <B>increased speed penalty</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Warrant"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 40
+    }
+  },
+  {
+    "name": "Wildfire Trigger",
+    "type": "Mod",
+    "tooltip": [
+      "> Converts to automatic",
+      "> <C>200%</> increased RPM",
+      "> <C>50%</> reduced recoil",
+      "<B>></> <C>0.5 s</> <B>spin up delay</>",
+      "<B>></> <C>20%</> <B>reduced damage</>",
+      "<B>></> <C>50%</> <B>increased spread gain</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Deckard"
+    ],
+    "excludes": [
+      "Light Trigger"
+    ],
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Heavy Receiver",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>50%</> increased damage",
+      "> <C>25%</> increased velocity + environment penetration",
+      "<B>></> <C>35%</> <B>reduced RPM</>",
+      "<B>></> <C>50</> <B>reduced ammo capacity</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Inhibitor"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "hardware",
+      "value": 40
+    }
+  },
+  {
+    "name": "Havok Cycler",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>0-100%</> increased RPM, scaling proportionally to rounds fired from <C>0-20%</> capacity",
+      "<B>></> <C>50%</> <B>increased spread gain</>",
+      "<B>></> <C>35%</> <B>reduced RPM</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Icarus",
+      "Inhibitor"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 45
+    }
+  },
+  {
+    "name": "Frag Mag",
+    "type": "Mod",
+    "tooltip": [
+      "> Fragments rounds while aiming",
+      "> <C>4</> fragments per shot",
+      "> <C>25%</> of base damage per fragment",
+      "<B>></> <C>25%</> <B>reduced far damage range while active</>",
+      "<B>></> <C>0.25x</> <B>reduced headshot damage multiplier while active</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Major",
+      "Sentinel"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 25
+    }
+  },
+  {
+    "name": "VX Accelerator",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>100%</> reduced damage falloff",
+      "> <C>50%</> increased velocity + environment penetration",
+      "> <C>25%</> reduced recoil",
+      "<B>></> <C>0.25 s</> <B>spin up delay</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Vigil",
+      "Helix"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Cripple Gauge",
+    "type": "Mod",
+    "tooltip": [
+      "> AOE knockback on firing while targets within a <C>5 m</> frontal cone",
+      "> <C>2 s</> snare to enemies in range, cripple if within <C>2.5 m</>",
+      "<B>></> <C>25%</> <B>reduced damage</>",
+      "<B>></> <C>50%</> <B>increased pellet spread</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Cerberus",
+      "Master-Key"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 50
+    }
+  },
+  {
+    "name": "Hammer-Head",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>200%</> increased damage every <C>4th</> shot",
+      "<B>></> <C>200%</> <B>increased vertical recoil every</> <C>4th</> <B>shot</>",
+      "<B>></> <C>25%</> <B>reduced damage</>",
+      "<B>></> <C>25%</> <B>increased spread gain</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Custodian"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 45
+    }
+  },
+  {
+    "name": "BRRRT Trigger",
+    "type": "Mod",
+    "tooltip": [
+      "> <C>50%</> increased RPM",
+      "> Entire magazine emptied on firing",
+      "<B>></> <C>50%</> <B>increased recoil, spread + spread gain</>",
+      "<B>></> <C>15%</> <B>reduced damage</>",
+      "<B>> Firing can no longer be interrupted by other actions</>"
+    ],
+    "technician": "false",
+    "compatibility": [
+      "Geist"
+    ],
+    "excludes": [],
+    "foundations": {
+      "type": "tech",
+      "value": 30
+    }
+  }
+]

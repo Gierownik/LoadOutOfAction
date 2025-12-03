@@ -57,10 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function fetchLoadoutData() {
         // 🚨 IMPORTANT: Replace these paths with the correct URLs for your files.
-        const ID_URL = 'https://github.com/Gierownik/OOA-Database/blob/main/UEparser/id.json'; // This one should remain if it's in the same directory
-        const WEAPONS_URL = 'https://github.com/Gierownik/OOA-Database/blob/main/UEparser/weapons.json'; // Example: 'https://raw.githubusercontent.com/user/repo/main/weapons.json'
-        const ATTACHMENTS_URL = 'https://github.com/Gierownik/OOA-Database/blob/main/UEparser/attachments.json'; 
-        const DEVICES_URL = 'https://github.com/Gierownik/OOA-Database/blob/main/UEparser/devices.json'; 
+        const ID_URL = 'id.json'; // This one should remain if it's in the same directory
+        const WEAPONS_URL = 'weapons.json'; // Example: 'https://raw.githubusercontent.com/user/repo/main/weapons.json'
+        const ATTACHMENTS_URL = 'attachments.json'; 
+        const DEVICES_URL = 'devices.json'; 
 
         try {
             const [idResp, weaponsResp, attachmentsResp, devicesResp] = await Promise.all([

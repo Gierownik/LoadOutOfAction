@@ -1,0 +1,596 @@
+[
+  {
+    "name": "AAP Turret",
+    "type": "Standard",
+    "tooltip": [
+      "> Engages closest visible enemy within <C>25 m</> on activation",
+      "> Deals <C>20-10</> ballistic damage, <C>600 rpm</>, <C>50</> round capacity",
+      "> Can attach to surfaces + Shells",
+      "> Maximum Efficiency: <C>25%</> increased range + ammo capacity",
+      "<B>> Can be disabled</>"
+    ],
+    "experimental": "true",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 60.0,
+      "action": "Throw",
+      "activation": "Proximity detection",
+      "activation_delay": 0.0,
+      "velocity": 10.0,
+      "speed_penalty": 0.35,
+      "hack_cost": 0.0,
+      "secondary_action": "true",
+      "can_be_disabled": "true"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 45
+    }
+  },
+  {
+    "name": "Anchor",
+    "type": "Standard",
+    "tooltip": [
+      "> Can be used by Nano-wire to attach + pull towards location",
+      "> Restores aux power, aerial maneuver charges + clears snare on pull",
+      "> Useable by allies",
+      "> Can attach to surfaces + Shells",
+      "> Maximum Efficiency: <C>4 s</> Overcharge on pull"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 5.0,
+      "duration": 120.0,
+      "action": "Throw",
+      "activation": "Activate",
+      "activation_delay": 0.0,
+      "velocity": 25.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 0.0,
+      "secondary_action": "true",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 0
+    }
+  },
+  {
+    "name": "Bolster",
+    "type": "Enhancement",
+    "tooltip": [
+      "> While active: Bleed + knockdown immunity, <C>200</> max defense, <C>0 s</> defense regen delay, <C>40 /s</> defense regeneration",
+      "> Maximum Efficiency: <C>100%</> increased duration",
+      "<B>> While active:</> <C>50%</> <B>reduced speed + vitals restored from all sources</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 5.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.4,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 45
+    }
+  },
+  {
+    "name": "Spike",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Deals <C>25</> vital damage, <C>4 s</> disable + snare to up to <C>6</> visible or detected enemies, executes if target below <C>25%</> vitals if scan hack",
+      "> Destroys visible or detected devices",
+      "<B>> Requires</> <C>25</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "true",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 25.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Combust",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Deals <C>25</> fire damage + combust to up to <C>6</> visible or detected enemies, damage increased by <C>25%</> per addtional enemy if scan hack",
+      "<B>> Requires</> <C>25</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 25.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 20
+    }
+  },
+  {
+    "name": "Parasite",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Deals <C>5</> vitals damage every <C>0.5 s</> for <C>2.5 s</> to up to <C>6</> visible or detected enemies",
+      "> <C>300%</> of damage dealt restored to vitals, restores vitals to allies if scan hack",
+      "<B>> Requires</> <C>50</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "true",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 50.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Desync",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Deals <C>5</> vital damage, <C>6 s</> desync to visible + up to <C>6</> detected enemies, damage increased by <C>5</> per addtional enemy, duration increased by <C>25%</> per addtional enemy if scan hack",
+      "> Desync: Scrambles radar, detections + targeting systems",
+      "<B>> Requires</> <C>25</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 25.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 25
+    }
+  },
+  {
+    "name": "Cascade",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Initiates <C>8 s</> Core detonation to up to <C>6</> visible or detected enemies",
+      "<B>> Can only be used while scanning</>",
+      "<B>> Requires</> <C>100</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 100.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 50
+    }
+  },
+  {
+    "name": "Pathogen",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Applies <C>10 /s</> hemorrhage + Necrosis to up to <C>6</> visible or detected enemies",
+      "<B>> Can only be used while scanning</>",
+      "<B>> Requires</> <C>100</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 100.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 45
+    }
+  },
+  {
+    "name": "Lockdown",
+    "type": "Neuro-link",
+    "tooltip": [
+      "> Disarms + applies <C>4 s</> stun + cripple to up to <C>6</> visible or detected enemies",
+      "<B>> Can only be used while scanning</>",
+      "<B>> Requires</> <C>100</> <B>Core charge for scan hack</>",
+      "<B>> Detected + unable to use Neuro-Link devices for</> <C>2 s</> <B>on successful hack</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 100.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 45
+    }
+  },
+  {
+    "name": "Deadzone",
+    "type": "Standard",
+    "tooltip": [
+      "> Creates <C>16 m</> disruptive zone on activation",
+      "> Disable + snare to enemies within zone",
+      "> Disables enemy devices within zone",
+      "> Shroud to allies within zone",
+      "> Can attach to surfaces",
+      "> Maximum Efficiency: <C>5</> vital damage every <C>0.5 s</> to enemies within Deadzone"
+    ],
+    "experimental": "true",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 30.0,
+      "action": "Throw",
+      "activation": "Activate",
+      "activation_delay": 0.0,
+      "velocity": 15.0,
+      "speed_penalty": 0.25,
+      "hack_cost": 0.0,
+      "secondary_action": "true",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 50
+    }
+  },
+  {
+    "name": "Detonator",
+    "type": "Standard",
+    "tooltip": [
+      "> Deals <C>125-50</> explosive damage + knockback to targets within <C>2-4 m</> on activation",
+      "> Maximum Efficiency: <C>50%</> reduced activation delay",
+      "<B>> Can be disabled</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 0.0,
+      "action": "Throw",
+      "activation": "On impact",
+      "activation_delay": 1.0,
+      "velocity": 25.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "true"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 5
+    }
+  },
+  {
+    "name": "Disrupter",
+    "type": "Standard",
+    "tooltip": [
+      "> <C>4 s</> stun, + snare to targets within <C>6 m</> on activation",
+      "> Can attach to surfaces + Shells",
+      "> Maximum Efficiency: <C>50%</> reduced activation delay"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 0.0,
+      "action": "Throw",
+      "activation": "On impact",
+      "activation_delay": 1.0,
+      "velocity": 25.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 0
+    }
+  },
+  {
+    "name": "Firecracker",
+    "type": "Standard",
+    "tooltip": [
+      "> Deals <C>25-15</> explosive + <C>50-30</> fire damage to targets within <C>2-3 m</> + launches <C>10</> incendiary projectiles on impact",
+      "> Deals <C>100</> fire damage to targets within <C>5 m</> + launches <C>15</> incendiary projectiles on activation",
+      "> Incendiary projectile: Detonates after <C>1 s</>, igniting surface + dealing <C>5</> explosive + <C>5</> fire damage to targets within <C>2 m</>",
+      "> Maximum Efficiency: <C>100%</> increased duration"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 7.5,
+      "action": "Throw",
+      "activation": "Proximity detection",
+      "activation_delay": 0.0,
+      "velocity": 20.0,
+      "speed_penalty": 0.2,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 15
+    }
+  },
+  {
+    "name": "Laser Wire",
+    "type": "Standard",
+    "tooltip": [
+      "> Deals <C>75</> vital damage, <C>10 /s</> bleed + <C>4 s</> snare to enemies on activation",
+      "> <C>2</> charges",
+      "> Can attach to surfaces",
+      "> Maximum Efficiency: Applies hemorrhage",
+      "<B>> Can be disabled</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 60.0,
+      "action": "Throw",
+      "activation": "Activate",
+      "activation_delay": 0.0,
+      "velocity": 15.0,
+      "speed_penalty": 0.2,
+      "hack_cost": 0.0,
+      "secondary_action": "true",
+      "can_be_disabled": "true"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 10
+    }
+  },
+  {
+    "name": "Overcharge",
+    "type": "Enhancement",
+    "tooltip": [
+      "> While active: Disable immunity, <C>10%</> increased ground + climb speed, disable enemies + enemy devices within <C>3 m</> for <C>2 s</>",
+      "> Maximum Efficiency: <C>100%</> increased duration"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 5.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.2,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 0
+    }
+  },
+  {
+    "name": "Proximity Mine",
+    "type": "Standard",
+    "tooltip": [
+      "> Deals <C>125-50</> explosive damage, knockback + knockdown to targets within <C>2-5 m</> on activation",
+      "> Can attach to surfaces + Shells",
+      "> Maximum Efficiency: <C>50%</> reduced activation delay",
+      "<B>> Can be disabled</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 60.0,
+      "action": "Throw",
+      "activation": "Activate",
+      "activation_delay": 0.75,
+      "velocity": 15.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 0.0,
+      "secondary_action": "true",
+      "can_be_disabled": "true"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 10
+    }
+  },
+  {
+    "name": "Relocator",
+    "type": "Standard",
+    "tooltip": [
+      "> Relocate to device location on activation",
+      "> Telefrag targets within <C>1 m</> on relocation",
+      "> <C>2 s</> disable to enemies + devices within <C>3 m</> on relocation",
+      "> Can attach to surfaces + Shells",
+      "> Maximum Efficiency: <C>50</> vitals + max vitals restored on activation",
+      "<B>> Can be disabled</>"
+    ],
+    "experimental": "true",
+    "stats": {
+      "cooldown": 30.0,
+      "duration": 60.0,
+      "action": "Throw",
+      "activation": "Activate",
+      "activation_delay": 0.0,
+      "velocity": 25.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "true"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 40
+    }
+  },
+  {
+    "name": "Reserve Stim",
+    "type": "Enhancement",
+    "tooltip": [
+      "> <C>25</> vitals restored on activation, chemical heal",
+      "> <C>5 s</> bleed immunity if used while bleeding",
+      "> Maximum Efficiency: Becomes potent"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 30.0,
+      "duration": 0.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.15,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 5
+    }
+  },
+  {
+    "name": "Satchel Charge",
+    "type": "Standard",
+    "tooltip": [
+      "> Deals <C>150-50</> explosive damage, knockback + knockdown to targets within <C>2-5 m</> on activation",
+      "> Can attach to surfaces + Shells",
+      "> Maximum Efficiency: <C>50%</> of damage dealt as additional fire damage",
+      "<B>> Can be disabled</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 60.0,
+      "action": "Throw",
+      "activation": "Activate",
+      "activation_delay": 0.0,
+      "velocity": 10.0,
+      "speed_penalty": 0.3,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "true"
+    },
+    "foundations": {
+      "type": "hardware",
+      "value": 20
+    }
+  },
+  {
+    "name": "Shroud",
+    "type": "Enhancement",
+    "tooltip": [
+      "> While active: Undetectable by all equipment",
+      "> Maximum Efficiency: <C>100%</> increased duration"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 45.0,
+      "duration": 5.0,
+      "action": "Activate",
+      "activation": "None",
+      "activation_delay": 0,
+      "velocity": 0.0,
+      "speed_penalty": 0.25,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 15
+    }
+  },
+  {
+    "name": "Tempest",
+    "type": "Standard",
+    "tooltip": [
+      "> Creates multiple charged nano-particle clouds on activation",
+      "> Clouds obscures vision + targeting systems",
+      "> Detected + snare to enemies on contact",
+      "> <C>5 s</> Overcharge to allies on contact",
+      "> Maximum Efficiency: <C>100%</> increased duration",
+      "<B>> Can be cleared with fire</>"
+    ],
+    "experimental": "false",
+    "stats": {
+      "cooldown": 60.0,
+      "duration": 7.5,
+      "action": "Throw",
+      "activation": "On impact",
+      "activation_delay": 1.0,
+      "velocity": 25.0,
+      "speed_penalty": 0.25,
+      "hack_cost": 0.0,
+      "secondary_action": "false",
+      "can_be_disabled": "false"
+    },
+    "foundations": {
+      "type": "tech",
+      "value": 10
+    }
+  }
+]
