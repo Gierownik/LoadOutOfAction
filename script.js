@@ -1,160 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- GLOBAL CONSTANTS & AUGMENT IDs ---
-    const AUGMENT_TECHNICIAN = "23";      
-    const AUGMENT_VERSATILE = "61";       
-    const AUGMENT_HEAVY_WEAPONS = "19";   
-    const AUGMENT_NEURO_HACKER = "68";    
-    const AUGMENT_EXPERIMENTAL = "17";    
-    const DEVICE_DEADZONE_ID = "10"; // Based on id.json provided
+    // --- GLOBAL CONSTANTS & DATA STORAGE ---
+    
+    // Augment IDs for logic checks
+    const AUGMENT_TECHNICIAN = "23";      // Unlocks all general ammo + Incendiary Grenade for Warrant
+    const AUGMENT_VERSATILE = "61";       // Allows duplicate devices (No longer allows duplicate weapons)
+    const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot, unlocks heavy weapons, changes backup slot content
+    const AUGMENT_NEURO_HACKER = "68";    // Unlocks special devices
+
+    // Item IDs for specific rules
+    const WEAPON_WARRANT = "12";          
+    const DEVICE_SPECIAL_IDS = ["21", "23", "22"]; // Cascade, Lockdown, Pathogen
+    const WEAPON_HEAVY_IDS = ["16", "15", "20"];   // Blackout, Umibozu, Hole-punch
+    const WEAPON_BACKUP_DEFAULT_IDS = ["17", "22", "23", "1"]; // Akanami, Dusters, Fists, TTK
+
+    // Ammo ID Lists (from previous step)
+    const DEFAULT_GENERAL_AMMO_IDS = ["21", "20", "19", "26", "35"]; 
+    const WARRANT_DEFAULT_AMMO_IDS = ["38", "39", "41"];             
+    const WARRANT_TECHNICIAN_AMMO_ID = "40";                         
+    
+    let allData = {}; // Stores all data fetched from JSON (including Weapons, Devices, Ammo)
 
     // Lists of element IDs for easy iteration
     const AUGMENT_SELECTS = ['augment-1-select', 'augment-2-select', 'augment-3-select', 'augment-4-select'];
     const DEVICE_SELECTS = ['device-1-select', 'device-2-select'];
     const WEAPON_SELECTS = ['backup-weapon-select', 'secondary-weapon-select', 'primary-weapon-select'];
     
-    // All attachment slots (for dynamic filtering)
-    const ATTACHMENT_SLOTS = {
-        'secondary-ammo-select': { type: 'Ammo', weaponSlot: 'secondary-weapon-select' },
-        'primary-ammo-select': { type: 'Ammo', weaponSlot: 'primary-weapon-select' },
-        'secondary-optic-select': { type: 'Optic', weaponSlot: 'secondary-weapon-select' },
-        'primary-optic-select': { type: 'Optic', weaponSlot: 'primary-weapon-select' },
-        'secondary-mod-1-select': { type: 'Mod', weaponSlot: 'secondary-weapon-select' },
-        'secondary-mod-2-select': { type: 'Mod', weaponSlot: 'secondary-weapon-select' },
-        'secondary-mod-3-select': { type: 'Mod', weaponSlot: 'secondary-weapon-select' },
-        'secondary-mod-4-select': { type: 'Mod', weaponSlot: 'secondary-weapon-select' },
-        'primary-mod-1-select': { type: 'Mod', weaponSlot: 'primary-weapon-select' },
-        'primary-mod-2-select': { type: 'Mod', weaponSlot: 'primary-weapon-select' },
-        'primary-mod-3-select': { type: 'Mod', weaponSlot: 'primary-weapon-select' },
-        'primary-mod-4-select': { type: 'Mod', weaponSlot: 'primary-weapon-select' }
-    };
+    const SECONDARY_MOD_SELECTS = ['secondary-mod-1-select', 'secondary-mod-2-select', 'secondary-mod-3-select', 'secondary-mod-4-select'];
+    const PRIMARY_MOD_SELECTS = ['primary-mod-1-select', 'primary-mod-2-select', 'primary-mod-3-select', 'primary-mod-4-select'];
 
-    let allData = {
-        idMap: {}, 
-        shells: {},
-        augments: {},
-        weapons: [],    
-        devices: [],    
-        attachments: [] 
-    };
-
+    // Global state to hold currently selected items
     let loadoutState = {
         augments: [],
         devices: [],
         weapons: { backup: "", secondary: "", primary: "", all: [] },
-        mods: { primary: [], secondary: [] }, // Group mods by weapon slot
+        modsSecondary: [],
+        modsPrimary: [],
         isTechnician: false,
         isVersatile: false,
         isHeavyWeapons: false,
-        isNeuroHacker: false,
-        isExperimental: false
+        isNeuroHacker: false
     };
 
-    // --- DATA FETCHING & MAPPING ---
+    // --- DATA LOADING & POPULATION ---
 
     async function fetchLoadoutData() {
-        const ID_URL = 'id.json';
-        const WEAPONS_URL = 'weapons.json'; 
-        const ATTACHMENTS_URL = 'attachments.json'; 
-        const DEVICES_URL = 'devices.json'; 
-
         try {
-            const [idResp, weaponsResp, attachmentsResp, devicesResp] = await Promise.all([
-                fetch(ID_URL),
-                fetch(WEAPONS_URL),
-                fetch(ATTACHMENTS_URL),
-                fetch(DEVICES_URL)
-            ]);
-
-            const checkResponse = (resp, name) => {
-                if (!resp.ok) {
-                    throw new Error(`Failed to load ${name} (Status: ${resp.status}). Check file path and ensure a local web server is running.`);
-                }
-            };
-            checkResponse(idResp, ID_URL);
-            checkResponse(weaponsResp, WEAPONS_URL);
-            checkResponse(attachmentsResp, ATTACHMENTS_URL);
-            checkResponse(devicesResp, DEVICES_URL);
-
-            const [idData, weaponsData, attachmentsData, devicesData] = await Promise.all([
-                idResp.json(),
-                weaponsResp.json(),
-                attachmentsResp.json(),
-                devicesResp.json()
-            ]);
-            
-            return {
-                ...idData, 
-                weapons: weaponsData, 
-                devices: devicesData, 
-                attachments: attachmentsData 
-            };
-            
+            const response = await fetch('id.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}.`);
+            }
+            return await response.json();
         } catch (error) {
-            console.error("Critical Error during data loading. The application cannot run.", error);
-            alert(`Error loading data. See console for details. Ensure all files are present and a web server is used for local viewing. Error: ${error.message}`);
+            console.error("Could not fetch loadout data. Please ensure your web server is running and 'id.json' exists.", error);
+            alert("Error loading loadout data. Check the browser console for details.");
             return null;
         }
     }
 
-    function mapData(data) {
-        // 1. Create a unified Name -> ID map from id.json
-        const idMap = {};
-        Object.keys(data).forEach(category => {
-            if (typeof data[category] === 'object' && !Array.isArray(data[category])) {
-                Object.keys(data[category]).forEach(name => {
-                    idMap[name] = String(data[category][name]);
-                });
-            }
-        });
-        allData.idMap = idMap;
-        allData.shells = data.Shells;
-        allData.augments = data.Augments;
-
-        // 2. Map external JSON data arrays
-        allData.weapons = Array.isArray(data.weapons) ? data.weapons.map(w => ({ 
-            ...w, 
-            id: idMap[w.name] || w.name, 
-            slot: w.stats?.slot, // Use optional chaining to prevent crash if stats is missing
-            name: w.name 
-        })) : [];
-        
-        allData.devices = Array.isArray(data.devices) ? data.devices.map(d => ({ 
-            ...d, 
-            id: idMap[d.name] || d.name,
-            isExperimental: d.experimental === "true", 
-            // Check based on the known Deadzone ID from the provided id.json
-            isNeuroHackerRequired: (idMap[d.name] === DEVICE_DEADZONE_ID) 
-        })) : [];
-
-        allData.attachments = Array.isArray(data.attachments) ? data.attachments.map(a => ({ 
-            ...a, 
-            id: idMap[a.name] || a.name, 
-            type: a.type, // Ensure type is present for filtering
-            requiresTechnician: a.technician === "true", 
-            compatibility: a.compatibility || [] 
-        })) : [];
-    }
-
-    // --- UTILITY FUNCTIONS ---
-
-    function populateSelect(selectElementId, dataArray, defaultTextOverride) {
-        const select = document.getElementById(selectElementId);
-        if (!select) return;
-
-        select.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.value = "";
-        defaultOption.textContent = defaultTextOverride || `-- Select ${selectElementId.split('-')[0]} --`;
-        select.appendChild(defaultOption);
-
-        dataArray.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = item.name;
-            select.appendChild(option);
-        });
-    }
+    // --- STATE MANAGEMENT ---
 
     function updateLoadoutState() {
         const getValues = (ids) => ids.map(id => document.getElementById(id)?.value).filter(val => val);
@@ -168,170 +72,192 @@ document.addEventListener('DOMContentLoaded', () => {
             primary: document.getElementById('primary-weapon-select')?.value || "",
             all: getValues(WEAPON_SELECTS)
         };
-        
-        // Collect ALL selected mod IDs, grouped by weapon slot
-        loadoutState.mods.primary = PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
-        loadoutState.mods.secondary = SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
+
+        loadoutState.modsSecondary = getValues(SECONDARY_MOD_SELECTS);
+        loadoutState.modsPrimary = getValues(PRIMARY_MOD_SELECTS);
 
         loadoutState.isTechnician = loadoutState.augments.includes(AUGMENT_TECHNICIAN);
         loadoutState.isVersatile = loadoutState.augments.includes(AUGMENT_VERSATILE);
         loadoutState.isHeavyWeapons = loadoutState.augments.includes(AUGMENT_HEAVY_WEAPONS);
         loadoutState.isNeuroHacker = loadoutState.augments.includes(AUGMENT_NEURO_HACKER);
-        loadoutState.isExperimental = loadoutState.augments.includes(AUGMENT_EXPERIMENTAL);
     }
     
-    // --- RESTRICTION LOGIC ---
+    // --- CORE RESTRICTION FUNCTIONS ---
 
-    function applyAugmentRestrictions() {
-        // FIX: Ensure Augments are unique by checking against augments selected in *other* slots.
-        const selectedAugments = loadoutState.augments;
+    /**
+     * General restriction function for any dropdown based on an allowed list of IDs.
+     */
+    function applyDropdownRestriction(selectId, allowedIds, isUniqueCheck, selectedValues) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
 
-        AUGMENT_SELECTS.forEach(currentSelectId => {
-            const currentSelect = document.getElementById(currentSelectId);
-            const currentValue = currentSelect.value;
-            
-            // Collect all augment IDs selected in OTHER slots
-            const otherSelectedAugments = selectedAugments.filter(id => id !== currentValue);
-            
-            Array.from(currentSelect.options).forEach(option => {
-                const id = option.value;
-                
-                if (id === "") { // Always keep the "Select Augment" option enabled
-                    option.disabled = false;
-                    return;
-                }
-                
-                // Disable the option if its ID is present in the list of augments selected ELSEWHERE.
-                option.disabled = otherSelectedAugments.includes(id);
-            });
-        });
-    }
-
-    function applyWeaponRestrictions() {
-        const selectedWeaponNames = loadoutState.weapons.all.map(id => allData.weapons.find(w => w.id === id)?.name).filter(n => n);
-
-        WEAPON_SELECTS.forEach(selectId => {
-            const currentSelect = document.getElementById(selectId);
-            const currentValue = currentSelect.value;
-            
-            let targetSlot = "";
-            if (selectId.includes('backup')) {
-                targetSlot = loadoutState.isHeavyWeapons ? "Heavy" : "Backup";
-            } else if (selectId.includes('primary')) {
-                targetSlot = "Primary";
-            } else if (selectId.includes('secondary')) {
-                targetSlot = "Secondary";
-            }
-
-            let allowedWeapons = allData.weapons.filter(weapon => {
-                const weaponSlot = weapon.slot;
-                
-                if (weaponSlot === "Heavy") {
-                    return targetSlot === "Heavy" && loadoutState.isHeavyWeapons;
-                }
-                
-                if (!loadoutState.isVersatile) {
-                    return targetSlot === weaponSlot;
-                } 
-                
-                if (loadoutState.isVersatile) {
-                    return weaponSlot !== "Heavy" && targetSlot !== "Heavy";
-                }
-                
-                return false;
-            });
-            
-            // Apply Uniqueness: All weapons must be unique
-            const filteredData = allowedWeapons.filter(weapon => {
-                const selectedCount = selectedWeaponNames.filter(name => name === weapon.name).length;
-                return weapon.id === currentValue || selectedCount === 0;
-            });
-            
-            populateSelect(selectId, filteredData);
-        });
-    }
-
-    function applyDeviceRestrictions() {
-        let allowedDevices = allData.devices.filter(device => {
-            let isAvailable = true;
-
-            // Check for Neuro-hacker required devices (Deadzone)
-            if (device.isNeuroHackerRequired) {
-                 if (!loadoutState.isNeuroHacker) isAvailable = false;
-            }
-            
-            // Check for Experimental required devices
-            if (device.isExperimental) {
-                if (!loadoutState.isExperimental) isAvailable = false;
-            }
-            
-            return isAvailable;
-        });
-
-        // Apply uniqueness check: Versatile allows duplicates, otherwise unique.
-        const isUnique = !loadoutState.isVersatile;
-        DEVICE_SELECTS.forEach(id => {
-            const currentSelect = document.getElementById(id);
-            const currentValue = currentSelect.value;
-            
-            const filteredData = allowedDevices.filter(device => {
-                if (isUnique) {
-                    // Check if selected in OTHER slots
-                    const isSelected = loadoutState.devices.includes(device.id) && device.id !== currentValue;
-                    return !isSelected;
-                }
-                return true;
-            });
-            populateSelect(id, filteredData);
-        });
-    }
-
-    function applyAttachmentRestrictions() {
+        const currentValue = select.value;
+        const allowedSet = new Set(allowedIds);
         
-        for (const [selectId, { type, weaponSlot }] of Object.entries(ATTACHMENT_SLOTS)) {
-            const currentSelect = document.getElementById(selectId);
-            const selectedWeaponId = document.getElementById(weaponSlot)?.value;
-            const selectedWeaponName = allData.weapons.find(w => w.id === selectedWeaponId)?.name;
+        Array.from(select.options).forEach(option => {
+            const id = option.value;
             
-            let allowedAttachments = allData.attachments.filter(att => att.type === type);
-
-            allowedAttachments = allowedAttachments.filter(att => {
-                // Compatibility check: Only show attachments compatible with the selected weapon.
-                if (!selectedWeaponName) return false;
-                if (att.compatibility && !att.compatibility.includes(selectedWeaponName)) {
-                    return false;
-                }
-                
-                // Technician check: Require Technician augment if attachment needs it.
-                if (att.requiresTechnician && !loadoutState.isTechnician) {
-                    return false;
-                }
-                
-                return true;
-            });
-            
-            // Apply Mod uniqueness (Mods must be unique across the same weapon)
-            if (type === 'Mod') {
-                const weaponPrefix = weaponSlot.split('-')[0]; // 'secondary' or 'primary'
-                const selectedModsForWeapon = loadoutState.mods[weaponPrefix];
-                
-                // Collect mods selected in OTHER mod slots for the same weapon
-                const otherSelectedMods = selectedModsForWeapon.filter(id => id !== currentSelect.value);
-
-                const filteredData = allowedAttachments.filter(att => {
-                    const isSelected = otherSelectedMods.includes(att.id);
-                    
-                    // Keep the current selection enabled, and everything else filtered by uniqueness
-                    return att.id === currentSelect.value || !isSelected;
-                });
-                populateSelect(selectId, filteredData);
-            } else {
-                populateSelect(selectId, allowedAttachments);
+            if (id === "") {
+                option.disabled = false;
+                return;
             }
-        }
+
+            let isAllowed = allowedSet.has(id);
+
+            // Apply uniqueness check if requested (for Augments, Devices, Weapons)
+            if (isAllowed && isUniqueCheck) {
+                // If this option is already selected in another slot
+                const isSelectedInOtherSlot = selectedValues.filter(val => val === id && val !== currentValue).length > 0;
+                if (isSelectedInOtherSlot) {
+                    isAllowed = false;
+                }
+            }
+            
+            option.disabled = !isAllowed;
+            
+            // Clear selection if the current item is now disabled
+            if (!isAllowed && id === currentValue) {
+                select.value = "";
+            }
+        });
     }
 
+    /**
+     * Applies all Augment, Mod, Weapon, and Device uniqueness and availability rules.
+     */
+    function applyAvailabilityAndUniquenessRestrictions() {
+        
+        // --- 1. Augment Uniqueness ---
+        const allAugmentIds = Object.values(allData.Augments).map(String);
+        AUGMENT_SELECTS.forEach(id => {
+            applyDropdownRestriction(id, allAugmentIds, true, loadoutState.augments.filter(val => val !== AUGMENT_VERSATILE));
+        });
+
+        // --- 2. Mod Uniqueness (Per Weapon) ---
+        const allModIds = Object.values(allData.Mods).map(String);
+        applyDropdownRestriction('secondary-mod-1-select', allModIds, true, loadoutState.modsSecondary);
+        applyDropdownRestriction('secondary-mod-2-select', allModIds, true, loadoutState.modsSecondary);
+        applyDropdownRestriction('secondary-mod-3-select', allModIds, true, loadoutState.modsSecondary);
+        applyDropdownRestriction('secondary-mod-4-select', allModIds, true, loadoutState.modsSecondary);
+        applyDropdownRestriction('primary-mod-1-select', allModIds, true, loadoutState.modsPrimary);
+        applyDropdownRestriction('primary-mod-2-select', allModIds, true, loadoutState.modsPrimary);
+        applyDropdownRestriction('primary-mod-3-select', allModIds, true, loadoutState.modsPrimary);
+        applyDropdownRestriction('primary-mod-4-select', allModIds, true, loadoutState.modsPrimary);
+
+        // --- 3. Device Availability (Neuro-hacker) and Uniqueness (Conditional Versatile) ---
+        const allDeviceIds = Object.values(allData.Devices).map(String);
+        let allowedDeviceIds = allDeviceIds.filter(id => {
+            const isSpecialDevice = DEVICE_SPECIAL_IDS.includes(id);
+            // Block special devices unless Neuro-hacker is equipped
+            return !isSpecialDevice || loadoutState.isNeuroHacker;
+        });
+
+        DEVICE_SELECTS.forEach(id => {
+            // Apply uniqueness check ONLY if Versatile is NOT equipped
+            const isUnique = !loadoutState.isVersatile;
+            applyDropdownRestriction(id, allowedDeviceIds, isUnique, loadoutState.devices);
+        });
+
+        // --- 4. Weapon Availability and Uniqueness ---
+        const allWeaponIds = Object.values(allData.Weapons).map(String);
+        
+        // These are the weapons that are RESTRICTED from Primary/Secondary slots.
+        const backupExclusiveIds = WEAPON_BACKUP_DEFAULT_IDS.filter(id => id !== "23"); // All default backup weapons EXCEPT Fists
+        const heavyWeaponIds = WEAPON_HEAVY_IDS; 
+        
+        // Weapons available in Primary/Secondary slots
+        let primarySecondaryAllowedIds = allWeaponIds.filter(id => {
+            const isBackupDefault = backupExclusiveIds.includes(id);
+            const isHeavy = heavyWeaponIds.includes(id);
+            
+            // 1. Block backup-default (non-Fists) weapons
+            if (isBackupDefault) return false;
+            
+            // 2. Block heavy weapons unless Heavy Weapons augment is equipped
+            if (isHeavy && !loadoutState.isHeavyWeapons) return false;
+            
+            return true;
+        });
+        
+        // All weapons must be unique (Versatile no longer affects weapon uniqueness)
+        const selectedWeaponsExcludingCurrent = (currentId) => loadoutState.weapons.all.filter(val => val !== currentId);
+        
+        // Primary Slot
+        applyDropdownRestriction('primary-weapon-select', primarySecondaryAllowedIds, true, selectedWeaponsExcludingCurrent(loadoutState.weapons.primary));
+        
+        // Secondary Slot
+        applyDropdownRestriction('secondary-weapon-select', primarySecondaryAllowedIds, true, selectedWeaponsExcludingCurrent(loadoutState.weapons.secondary));
+
+        // Backup Slot (Has its own complex rules)
+        let backupAllowedIds = [];
+        if (loadoutState.isHeavyWeapons) {
+            // RULE: Heavy Weapons Augment is ON -> Heavy Weapons + Fists
+            backupAllowedIds = [...WEAPON_HEAVY_IDS, "23"]; 
+        } else {
+            // RULE: Heavy Weapons Augment is OFF -> Default Backup List
+            backupAllowedIds = WEAPON_BACKUP_DEFAULT_IDS;
+        }
+        
+        // Note: Backup slot still respects overall uniqueness (e.g., if Fists is in Backup, it can't be in Primary).
+        applyDropdownRestriction('backup-weapon-select', backupAllowedIds, true, selectedWeaponsExcludingCurrent(loadoutState.weapons.backup));
+    }
+
+
+    /**
+     * Applies Ammo restrictions based on Weapon and Technician Augment. (Logic from previous step, kept for completeness)
+     */
+    function applyAmmoRestrictions() {
+        
+        function updateAmmoSlot(weaponSelectId, ammoSelectId) {
+            const weaponId = document.getElementById(weaponSelectId)?.value;
+            const ammoSelect = document.getElementById(ammoSelectId);
+            if (!ammoSelect || !weaponId) return;
+
+            let allowedAmmoIds = new Set();
+            const currentAmmoValue = ammoSelect.value;
+            
+            if (weaponId === WEAPON_WARRANT) {
+                allowedAmmoIds = new Set(WARRANT_DEFAULT_AMMO_IDS);
+                if (loadoutState.isTechnician) {
+                    allowedAmmoIds.add(WARRANT_TECHNICIAN_AMMO_ID);
+                }
+            } else {
+                allowedAmmoIds = new Set(DEFAULT_GENERAL_AMMO_IDS);
+                
+                if (loadoutState.isTechnician) {
+                    const excludedGrenades = [...WARRANT_DEFAULT_AMMO_IDS, WARRANT_TECHNICIAN_AMMO_ID];
+                    Object.values(allData.Ammo).forEach(id => {
+                        if (!excludedGrenades.includes(String(id))) {
+                             allowedAmmoIds.add(String(id));
+                        }
+                    });
+                }
+            }
+            
+            // Apply restrictions to the dropdown
+            Array.from(ammoSelect.options).forEach(option => {
+                if (option.value === "") { 
+                    option.disabled = false;
+                } else {
+                    const isAllowed = allowedAmmoIds.has(option.value);
+                    option.disabled = !isAllowed;
+                    
+                    if (!isAllowed && option.value === currentAmmoValue) {
+                        ammoSelect.value = "";
+                    }
+                }
+            });
+        }
+        
+        updateAmmoSlot('secondary-weapon-select', 'secondary-ammo-select');
+        updateAmmoSlot('primary-weapon-select', 'primary-ammo-select');
+    }
+
+    /**
+     * Changes slot names based on equipped augments. (Logic from previous step, kept for completeness)
+     */
     function updateLabels() {
+        // Rename Backup slot to Heavy if Heavy Weapons is equipped
         const label = document.querySelector('label[for="backup-weapon-select"]');
         if (label) {
             if (loadoutState.isHeavyWeapons) {
@@ -347,40 +273,46 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function handleLoadoutChange() {
         updateLoadoutState();
-        
-        applyAugmentRestrictions(); 
-        applyWeaponRestrictions(); 
-        applyDeviceRestrictions();
-        
+        applyAvailabilityAndUniquenessRestrictions();
+        applyAmmoRestrictions();
         updateLabels();
-        
-        applyAttachmentRestrictions();
-        
-        // Final pass for cascading dependency updates (e.g. if a weapon was cleared, its attachments must be cleared)
-        updateLoadoutState();
-        applyAttachmentRestrictions();
     }
 
     /**
      * Initial setup and event listeners.
      */
     async function initializeEditor() {
-        const rawData = await fetchLoadoutData();
-        if (!rawData) return; 
+        const data = await fetchLoadoutData();
+        if (!data) return; 
         
-        mapData(rawData); 
+        allData = data; 
 
-        // Initial population of static items (Shells, Augments)
-        populateSelect('shell-select', Object.keys(allData.shells).map(name => ({ name, id: allData.shells[name] })));
-        AUGMENT_SELECTS.forEach(id => populateSelect(id, Object.keys(allData.augments).map(name => ({ name, id: allData.augments[name] }))));
+        // --- Initial Population using fetched data ---
+        populateSelect('shell-select', data.Shells);
+        
+        AUGMENT_SELECTS.forEach(id => populateSelect(id, data.Augments));
+        DEVICE_SELECTS.forEach(id => populateSelect(id, data.Devices));
+        
+        populateSelect('backup-weapon-select', data.Weapons);
+        populateSelect('secondary-weapon-select', data.Weapons);
+        populateSelect('primary-weapon-select', data.Weapons);
 
+        // Attachments
+        populateSelect('secondary-optic-select', data.Optics);
+        populateSelect('secondary-ammo-select', data.Ammo);
+        SECONDARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
+
+        populateSelect('primary-optic-select', data.Optics);
+        populateSelect('primary-ammo-select', data.Ammo);
+        PRIMARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
+        
         // --- Add Event Listeners ---
         const allSelects = document.querySelectorAll('.container select');
         allSelects.forEach(select => {
             select.addEventListener('change', handleLoadoutChange);
         });
 
-        // Run once on startup to populate all fields and apply initial restrictions
+        // Run once on startup to ensure initial state and restrictions are applied
         handleLoadoutChange();
     }
 
