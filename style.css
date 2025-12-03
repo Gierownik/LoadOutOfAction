@@ -102,3 +102,12 @@ select {
 .section-header h2 {
     margin: 0;
 }
+/* Add this rule to style.css */
+
+/* Custom styling for unselectable (disabled) options */
+option:disabled {
+    color: #999 !important; /* Makes the text gray */
+    background-color: #f8f8f8; /* Light background to visually distinguish it */
+    font-style: italic;
+    cursor: not-allowed;
+}
