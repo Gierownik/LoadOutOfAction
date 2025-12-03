@@ -51,14 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATA FETCHING & MAPPING ---
 
-    /**
-     * Fetches all four JSON files concurrently and merges the data.
-     * YOU MUST REPLACE THE PLACEHOLDER URLs BELOW.
-     */
     async function fetchLoadoutData() {
-        // 🚨 IMPORTANT: Replace these paths with the correct URLs for your files.
-        const ID_URL = 'id.json'; // This one should remain if it's in the same directory
-        const WEAPONS_URL = 'weapons.json'; // Example: 'https://raw.githubusercontent.com/user/repo/main/weapons.json'
+        // Ensure these paths are correct for your local environment!
+        const ID_URL = 'id.json';
+        const WEAPONS_URL = 'weapons.json'; 
         const ATTACHMENTS_URL = 'attachments.json'; 
         const DEVICES_URL = 'devices.json'; 
 
@@ -70,18 +66,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetch(DEVICES_URL)
             ]);
 
-            // Check for non-200 responses
-            if (!idResp.ok || !weaponsResp.ok || !attachmentsResp.ok || !devicesResp.ok) {
-                 // Determine which file failed for better debugging
-                const failed = [
-                    !idResp.ok ? 'id.json' : '', 
-                    !weaponsResp.ok ? 'weapons.json' : '', 
-                    !attachmentsResp.ok ? 'attachments.json' : '', 
-                    !devicesResp.ok ? 'devices.json' : ''
-                ].filter(Boolean).join(', ');
-                
-                throw new Error(`One or more files failed to load: ${failed}. Check paths and CORS settings.`);
-            }
+            // Check for non-200 responses and provide debug info
+            const checkResponse = (resp, name) => {
+                if (!resp.ok) {
+                    throw new Error(`Failed to load ${name} (Status: ${resp.status}). Check the file path and ensure a web server is running for local access.`);
+                }
+            };
+            checkResponse(idResp, ID_URL);
+            checkResponse(weaponsResp, WEAPONS_URL);
+            checkResponse(attachmentsResp, ATTACHMENTS_URL);
+            checkResponse(devicesResp, DEVICES_URL);
 
             const [idData, weaponsData, attachmentsData, devicesData] = await Promise.all([
                 idResp.json(),
@@ -90,26 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 devicesResp.json()
             ]);
             
-            // Merge all data into one object
             return {
-                ...idData, // Contains Shells, Augments, Optics, etc.
-                weapons: weaponsData, // Array of weapon objects
-                devices: devicesData, // Array of device objects
-                attachments: attachmentsData // Array of attachment objects
+                ...idData, 
+                weapons: weaponsData, 
+                devices: devicesData, 
+                attachments: attachmentsData 
             };
             
         } catch (error) {
-            console.error("Error loading loadout data. Please check your file paths and web server status.", error);
-            alert("Error loading loadout data. Check the browser console for details.");
+            console.error("Critical Error during data loading:", error);
+            alert(`Error loading data. See console for details. (Likely file access issue: ${error.message})`);
             return null;
         }
     }
 
-    /**
-     * Maps and processes the combined raw data into the global 'allData' structure.
-     */
     function mapData(data) {
-        // 1. Create a unified Name -> ID map for easy lookup from id.json
+        // 1. Create a unified Name -> ID map from id.json
         const idMap = {};
         Object.keys(data).forEach(category => {
             if (typeof data[category] === 'object' && !Array.isArray(data[category])) {
@@ -122,31 +112,34 @@ document.addEventListener('DOMContentLoaded', () => {
         allData.shells = data.Shells;
         allData.augments = data.Augments;
 
-        // 2. Map Weapons, Devices, and Attachments using complex properties
+        // 2. Map external JSON data
         allData.weapons = data.weapons.map(w => ({ 
             ...w, 
             id: idMap[w.name] || w.name, 
-            slot: w.stats.slot, // READ from weapons.json
+            slot: w.stats.slot, 
             name: w.name 
         }));
         
         allData.devices = data.devices.map(d => ({ 
             ...d, 
             id: idMap[d.name] || d.name,
-            isExperimental: d.experimental === "true" // READ from devices.json
+            isExperimental: d.experimental === "true", 
+            // Static check for Deadzone (ID 10) based on previous logic, which requires Neuro-Hacker
+            isNeuroHackerRequired: (idMap[d.name] === "10") 
         }));
 
         allData.attachments = data.attachments.map(a => ({ 
             ...a, 
             id: idMap[a.name] || a.name, 
-            requiresTechnician: a.technician === "true", // READ from attachments.json
-            compatibility: a.compatibility || [] // READ from attachments.json
+            requiresTechnician: a.technician === "true", 
+            compatibility: a.compatibility || [] 
         }));
     }
 
     // --- UTILITY FUNCTIONS ---
 
     function populateSelect(selectElementId, dataArray, defaultTextOverride) {
+        // ... (function remains the same) ...
         const select = document.getElementById(selectElementId);
         if (!select) return;
 
@@ -177,11 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
             all: getValues(WEAPON_SELECTS)
         };
         
-        const primaryMods = [];
-        PRIMARY_MOD_SELECTS.forEach(id => { const val = document.getElementById(id)?.value; if (val) primaryMods.push(val); });
-        const secondaryMods = [];
-        SECONDARY_MOD_SELECTS.forEach(id => { const val = document.getElementById(id)?.value; if (val) secondaryMods.push(val); });
-        loadoutState.mods = [...primaryMods, ...secondaryMods];
+        // Collect ALL selected mod IDs for uniqueness checks across a single weapon
+        const primaryMods = PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
+        const secondaryMods = SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
+        loadoutState.mods = { primary: primaryMods, secondary: secondaryMods };
 
         loadoutState.isTechnician = loadoutState.augments.includes(AUGMENT_TECHNICIAN);
         loadoutState.isVersatile = loadoutState.augments.includes(AUGMENT_VERSATILE);
@@ -192,41 +184,36 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- RESTRICTION LOGIC ---
 
-    /**
-     * General restriction function for uniqueness checks.
-     */
-    function applyUniqueness(selectIds, allValues) {
-        selectIds.forEach(currentSelectId => {
+    function applyAugmentRestrictions() {
+        // FIX: Ensure Augments are unique.
+        const selectedAugments = loadoutState.augments;
+        const allAugmentIds = Object.keys(allData.augments).map(name => allData.idMap[name]);
+
+        AUGMENT_SELECTS.forEach(currentSelectId => {
             const currentSelect = document.getElementById(currentSelectId);
             const currentValue = currentSelect.value;
             
             Array.from(currentSelect.options).forEach(option => {
                 const id = option.value;
-                if (id === currentValue || id === "") return;
-
-                // Check if this option is selected in ANY other slot of the provided group
-                const isSelectedInOtherSlot = allValues.filter(val => val === id).length > 0;
-                
-                if (isSelectedInOtherSlot) {
-                    option.disabled = true;
-                } else if (!option.disabled) {
-                    // Only re-enable if it's not disabled by availability rules (which runs later)
+                if (id === currentValue || id === "") {
                     option.disabled = false;
+                    return;
                 }
+                
+                // Disable if selected in another slot
+                const selectedCount = selectedAugments.filter(val => val === id).length;
+                option.disabled = selectedCount > 0;
             });
         });
     }
 
     function applyWeaponRestrictions() {
-        // --- 1. Filter Weapons based on Slot, Augment, and Uniqueness ---
-        
         const selectedWeaponNames = loadoutState.weapons.all.map(id => allData.weapons.find(w => w.id === id)?.name).filter(n => n);
 
         WEAPON_SELECTS.forEach(selectId => {
             const currentSelect = document.getElementById(selectId);
             const currentValue = currentSelect.value;
             
-            // Determine the slot type based on the element ID and Heavy Weapons augment
             let targetSlot = "";
             if (selectId.includes('backup')) {
                 targetSlot = loadoutState.isHeavyWeapons ? "Heavy" : "Backup";
@@ -239,29 +226,25 @@ document.addEventListener('DOMContentLoaded', () => {
             let allowedWeapons = allData.weapons.filter(weapon => {
                 const weaponSlot = weapon.slot;
                 
-                // Heavy weapons are ALWAYS locked to the Backup/Heavy slot.
                 if (weaponSlot === "Heavy") {
                     return targetSlot === "Heavy" && loadoutState.isHeavyWeapons;
                 }
                 
-                // If Versatile is NOT equipped, weapon is locked to its designated slot.
                 if (!loadoutState.isVersatile) {
                     return targetSlot === weaponSlot;
                 } 
                 
-                // If Versatile IS equipped, allow non-Heavy weapons in any non-Heavy slot.
+                // Versatile is equipped: allows non-Heavy weapons in any non-Heavy slot (Primary, Secondary, Backup)
                 if (loadoutState.isVersatile) {
-                    // This rule means if the weapon slot is Primary/Secondary/Backup, it can go in any of the three.
-                    return targetSlot !== "Heavy" && weaponSlot !== "Heavy";
+                    return weaponSlot !== "Heavy" && targetSlot !== "Heavy";
                 }
                 
-                return false; // Catch-all safety
+                return false;
             });
             
             // Apply Uniqueness: All weapons must be unique (Versatile only affects devices)
             const filteredData = allowedWeapons.filter(weapon => {
                 const selectedCount = selectedWeaponNames.filter(name => name === weapon.name).length;
-                // Keep the current selection enabled, otherwise, disable if already selected once
                 return weapon.id === currentValue || selectedCount === 0;
             });
             
@@ -270,17 +253,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyDeviceRestrictions() {
-        // --- 2. Filter Devices based on Augments and Uniqueness ---
+        // FIX: Device uniqueness check.
         
         let allowedDevices = allData.devices.filter(device => {
             let isAvailable = true;
 
-            // Static Neuro-hacker check (Deadzone) - Example based on previous static logic
-            if (device.name === "Deadzone") { 
-                if (!loadoutState.isNeuroHacker) isAvailable = false;
+            // Check for Neuro-hacker required devices (Deadzone)
+            if (device.isNeuroHackerRequired) {
+                 if (!loadoutState.isNeuroHacker) isAvailable = false;
             }
             
-            // Dynamic Experimental check (new rule)
+            // Check for Experimental required devices
             if (device.isExperimental) {
                 if (!loadoutState.isExperimental) isAvailable = false;
             }
@@ -288,12 +271,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return isAvailable;
         });
 
-        // Apply uniqueness check: conditional on Versatile (only Versatile allows duplicates)
+        // Apply uniqueness check: Versatile allows duplicates, otherwise unique.
         const isUnique = !loadoutState.isVersatile;
         DEVICE_SELECTS.forEach(id => {
+            const currentSelect = document.getElementById(id);
+            const currentValue = currentSelect.value;
+            
             const filteredData = allowedDevices.filter(device => {
                 if (isUnique) {
-                    const isSelected = loadoutState.devices.includes(device.id) && device.id !== document.getElementById(id).value;
+                    // Check if selected in OTHER slots
+                    const isSelected = loadoutState.devices.includes(device.id) && device.id !== currentValue;
                     return !isSelected;
                 }
                 return true;
@@ -303,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyAttachmentRestrictions() {
-        // --- 3. Filter Attachments (Ammo/Mods/Optics) based on Weapon Compatibility and Technician Augment ---
         
         for (const [selectId, { type, weaponSlot }] of Object.entries(ATTACHMENT_SLOTS)) {
             const currentSelect = document.getElementById(selectId);
@@ -314,7 +300,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             allowedAttachments = allowedAttachments.filter(att => {
                 // Compatibility check: Only show attachments compatible with the selected weapon.
-                // If no weapon is selected, show nothing.
                 if (!selectedWeaponName) return false;
                 if (att.compatibility && !att.compatibility.includes(selectedWeaponName)) {
                     return false;
@@ -330,21 +315,21 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Apply Mod uniqueness (Mods must be unique across the same weapon)
             if (type === 'Mod') {
-                // Get all selected mods for the current weapon (excluding the current slot)
-                const currentWeaponModSlots = [
-                    'secondary-mod-1-select', 'secondary-mod-2-select', 'secondary-mod-3-select', 'secondary-mod-4-select',
-                    'primary-mod-1-select', 'primary-mod-2-select', 'primary-mod-3-select', 'primary-mod-4-select'
-                ].filter(id => id.includes(weaponSlot.split('-')[0]) && id !== selectId);
+                const weaponPrefix = weaponSlot.split('-')[0]; // 'secondary' or 'primary'
+                const selectedModsForWeapon = loadoutState.mods[weaponPrefix];
                 
-                const selectedModsForWeapon = currentWeaponModSlots.map(id => document.getElementById(id)?.value).filter(val => val);
+                // The current value should not count against itself
+                const otherSelectedMods = selectedModsForWeapon.filter(id => id !== currentSelect.value);
 
                 const filteredData = allowedAttachments.filter(att => {
-                    const isSelected = selectedModsForWeapon.includes(att.id);
-                    return !isSelected;
+                    // FIX: Check against otherSelectedMods
+                    const isSelected = otherSelectedMods.includes(att.id);
+                    
+                    // Keep the current selection enabled, and everything else filtered by uniqueness
+                    return att.id === currentSelect.value || !isSelected;
                 });
                 populateSelect(selectId, filteredData);
             } else {
-                // Ammo and Optic fields just use the filtered list
                 populateSelect(selectId, allowedAttachments);
             }
         }
@@ -367,18 +352,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleLoadoutChange() {
         updateLoadoutState();
         
-        // Order of operations is crucial: Weapons/Devices filter first, then Attachments.
+        // 1. Apply augment uniqueness (Highest priority fix)
+        applyAugmentRestrictions(); 
+        
+        // 2. Apply complex weapon/device filters
         applyWeaponRestrictions(); 
         applyDeviceRestrictions();
+        
+        // 3. Update labels (must run before attachments)
+        updateLabels();
+        
+        // 4. Apply attachments (depends on current weapon/augment state)
         applyAttachmentRestrictions();
         
-        updateLabels();
-
-        // Run a second time to ensure all interdependencies (cleared selections) are resolved.
-        // e.g., if selecting a weapon clears the augment, the weapon list might need re-filtering.
+        // Final pass to ensure cascading dependency updates (e.g. if a weapon was cleared)
         updateLoadoutState();
-        applyWeaponRestrictions();
-        applyDeviceRestrictions();
         applyAttachmentRestrictions();
     }
 
@@ -395,8 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSelect('shell-select', Object.keys(allData.shells).map(name => ({ name, id: allData.shells[name] })));
         AUGMENT_SELECTS.forEach(id => populateSelect(id, Object.keys(allData.augments).map(name => ({ name, id: allData.augments[name] }))));
 
-        // Initial population of all dynamic slots is handled by the initial run of handleLoadoutChange
-        
         // --- Add Event Listeners ---
         const allSelects = document.querySelectorAll('.container select');
         allSelects.forEach(select => {
