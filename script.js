@@ -2,25 +2,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- GLOBAL CONSTANTS & DATA STORAGE ---
     
-    // Augment IDs for logic checks
+    // IDs for logic checks (Values come from the id.json file)
     const AUGMENT_TECHNICIAN = "23";      // Unlocks all general ammo + Incendiary Grenade for Warrant
-    const AUGMENT_VERSATILE = "61";       // Allows duplicate devices (No longer allows duplicate weapons)
-    const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot, unlocks heavy weapons, changes backup slot content
-    const AUGMENT_NEURO_HACKER = "68";    // Unlocks special devices
-
-    // Item IDs for specific rules
-    const WEAPON_WARRANT = "12";          
-    const DEVICE_SPECIAL_IDS = ["21", "23", "22"]; // Cascade, Lockdown, Pathogen
-    const WEAPON_HEAVY_IDS = ["16", "15", "20"];   // Blackout, Umibozu, Hole-punch
-    const WEAPON_BACKUP_DEFAULT_IDS = ["17", "22", "23", "1"]; // Akanami, Dusters, Fists, TTK
-
-    // Ammo ID Lists (from previous step)
-    const DEFAULT_GENERAL_AMMO_IDS = ["21", "20", "19", "26", "35"]; 
-    const WARRANT_DEFAULT_AMMO_IDS = ["38", "39", "41"];             
-    const WARRANT_TECHNICIAN_AMMO_ID = "40";                         
+    const AUGMENT_VERSATILE = "61";       // Allows duplicate weapons/devices
+    const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot
+    const WEAPON_WARRANT = "12";          // Special ammo rules apply
     
-    let allData = {}; // Stores all data fetched from JSON (including Weapons, Devices, Ammo)
-
+    // Ammo ID Lists (based on id.json)
+    const DEFAULT_GENERAL_AMMO_IDS = ["21", "20", "19", "26", "35"]; // Shred, Heavy, Piercing, Standard, TD Ammo
+    const WARRANT_DEFAULT_AMMO_IDS = ["38", "39", "41"];             // Standard, Impact, Proximity Grenade
+    const WARRANT_TECHNICIAN_AMMO_ID = "40";                         // Incendiary Grenade
+    
+    let allAmmoData = {}; // Stores all Ammo data fetched from JSON
+    
     // Lists of element IDs for easy iteration
     const AUGMENT_SELECTS = ['augment-1-select', 'augment-2-select', 'augment-3-select', 'augment-4-select'];
     const DEVICE_SELECTS = ['device-1-select', 'device-2-select'];
@@ -33,22 +27,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let loadoutState = {
         augments: [],
         devices: [],
-        weapons: { backup: "", secondary: "", primary: "", all: [] },
+        weapons: { 
+            secondary: "", 
+            primary: "",
+        },
         modsSecondary: [],
         modsPrimary: [],
         isTechnician: false,
         isVersatile: false,
-        isHeavyWeapons: false,
-        isNeuroHacker: false
+        isHeavyWeapons: false
     };
 
     // --- DATA LOADING & POPULATION ---
 
+    /**
+     * Function to fetch and parse the JSON file from the same directory.
+     */
     async function fetchLoadoutData() {
         try {
             const response = await fetch('id.json');
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}.`);
+                throw new Error(`HTTP error! Status: ${response.status}. Ensure id.json is in the root directory.`);
             }
             return await response.json();
         } catch (error) {
@@ -58,153 +57,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Helper function to populate a <select> element.
+     */
+    function populateSelect(selectElementId, dataObject, defaultTextOverride) {
+        const select = document.getElementById(selectElementId);
+        if (!select) return;
+
+        select.innerHTML = ''; 
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = defaultTextOverride || `-- Select ${selectElementId.split('-')[0]} --`;
+        select.appendChild(defaultOption);
+
+        const sortedKeys = Object.keys(dataObject).sort();
+        sortedKeys.forEach(name => {
+            const option = document.createElement('option');
+            option.value = String(dataObject[name]); 
+            option.textContent = name;
+            select.appendChild(option);
+        });
+    }
+
     // --- STATE MANAGEMENT ---
 
+    /**
+     * Collects the current state of the loadout from all dropdowns.
+     */
     function updateLoadoutState() {
         const getValues = (ids) => ids.map(id => document.getElementById(id)?.value).filter(val => val);
         
         loadoutState.augments = getValues(AUGMENT_SELECTS);
         loadoutState.devices = getValues(DEVICE_SELECTS);
         
+        // Note: Backup is unmoddable, so only Primary/Secondary influence ammo/mod restrictions
+        const allEquippedWeapons = getValues(WEAPON_SELECTS);
         loadoutState.weapons = {
             backup: document.getElementById('backup-weapon-select')?.value || "",
             secondary: document.getElementById('secondary-weapon-select')?.value || "",
             primary: document.getElementById('primary-weapon-select')?.value || "",
-            all: getValues(WEAPON_SELECTS)
+            all: allEquippedWeapons
         };
 
         loadoutState.modsSecondary = getValues(SECONDARY_MOD_SELECTS);
         loadoutState.modsPrimary = getValues(PRIMARY_MOD_SELECTS);
 
+        // Check for special augments
         loadoutState.isTechnician = loadoutState.augments.includes(AUGMENT_TECHNICIAN);
         loadoutState.isVersatile = loadoutState.augments.includes(AUGMENT_VERSATILE);
         loadoutState.isHeavyWeapons = loadoutState.augments.includes(AUGMENT_HEAVY_WEAPONS);
-        loadoutState.isNeuroHacker = loadoutState.augments.includes(AUGMENT_NEURO_HACKER);
     }
+
+    // --- RESTRICTION LOGIC ---
     
-    // --- CORE RESTRICTION FUNCTIONS ---
-
     /**
-     * General restriction function for any dropdown based on an allowed list of IDs.
-     */
-    function applyDropdownRestriction(selectId, allowedIds, isUniqueCheck, selectedValues) {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-
-        const currentValue = select.value;
-        const allowedSet = new Set(allowedIds);
-        
-        Array.from(select.options).forEach(option => {
-            const id = option.value;
-            
-            if (id === "") {
-                option.disabled = false;
-                return;
-            }
-
-            let isAllowed = allowedSet.has(id);
-
-            // Apply uniqueness check if requested (for Augments, Devices, Weapons)
-            if (isAllowed && isUniqueCheck) {
-                // If this option is already selected in another slot
-                const isSelectedInOtherSlot = selectedValues.filter(val => val === id && val !== currentValue).length > 0;
-                if (isSelectedInOtherSlot) {
-                    isAllowed = false;
-                }
-            }
-            
-            option.disabled = !isAllowed;
-            
-            // Clear selection if the current item is now disabled
-            if (!isAllowed && id === currentValue) {
-                select.value = "";
-            }
-        });
-    }
-
-    /**
-     * Applies all Augment, Mod, Weapon, and Device uniqueness and availability rules.
-     */
-    function applyAvailabilityAndUniquenessRestrictions() {
-        
-        // --- 1. Augment Uniqueness ---
-        const allAugmentIds = Object.values(allData.Augments).map(String);
-        AUGMENT_SELECTS.forEach(id => {
-            applyDropdownRestriction(id, allAugmentIds, true, loadoutState.augments.filter(val => val !== AUGMENT_VERSATILE));
-        });
-
-        // --- 2. Mod Uniqueness (Per Weapon) ---
-        const allModIds = Object.values(allData.Mods).map(String);
-        applyDropdownRestriction('secondary-mod-1-select', allModIds, true, loadoutState.modsSecondary);
-        applyDropdownRestriction('secondary-mod-2-select', allModIds, true, loadoutState.modsSecondary);
-        applyDropdownRestriction('secondary-mod-3-select', allModIds, true, loadoutState.modsSecondary);
-        applyDropdownRestriction('secondary-mod-4-select', allModIds, true, loadoutState.modsSecondary);
-        applyDropdownRestriction('primary-mod-1-select', allModIds, true, loadoutState.modsPrimary);
-        applyDropdownRestriction('primary-mod-2-select', allModIds, true, loadoutState.modsPrimary);
-        applyDropdownRestriction('primary-mod-3-select', allModIds, true, loadoutState.modsPrimary);
-        applyDropdownRestriction('primary-mod-4-select', allModIds, true, loadoutState.modsPrimary);
-
-        // --- 3. Device Availability (Neuro-hacker) and Uniqueness (Conditional Versatile) ---
-        const allDeviceIds = Object.values(allData.Devices).map(String);
-        let allowedDeviceIds = allDeviceIds.filter(id => {
-            const isSpecialDevice = DEVICE_SPECIAL_IDS.includes(id);
-            // Block special devices unless Neuro-hacker is equipped
-            return !isSpecialDevice || loadoutState.isNeuroHacker;
-        });
-
-        DEVICE_SELECTS.forEach(id => {
-            // Apply uniqueness check ONLY if Versatile is NOT equipped
-            const isUnique = !loadoutState.isVersatile;
-            applyDropdownRestriction(id, allowedDeviceIds, isUnique, loadoutState.devices);
-        });
-
-        // --- 4. Weapon Availability and Uniqueness ---
-        const allWeaponIds = Object.values(allData.Weapons).map(String);
-        
-        // These are the weapons that are RESTRICTED from Primary/Secondary slots.
-        const backupExclusiveIds = WEAPON_BACKUP_DEFAULT_IDS.filter(id => id !== "23"); // All default backup weapons EXCEPT Fists
-        const heavyWeaponIds = WEAPON_HEAVY_IDS; 
-        
-        // Weapons available in Primary/Secondary slots
-        let primarySecondaryAllowedIds = allWeaponIds.filter(id => {
-            const isBackupDefault = backupExclusiveIds.includes(id);
-            const isHeavy = heavyWeaponIds.includes(id);
-            
-            // 1. Block backup-default (non-Fists) weapons
-            if (isBackupDefault) return false;
-            
-            // 2. Block heavy weapons unless Heavy Weapons augment is equipped
-            if (isHeavy && !loadoutState.isHeavyWeapons) return false;
-            
-            return true;
-        });
-        
-        // All weapons must be unique (Versatile no longer affects weapon uniqueness)
-        const selectedWeaponsExcludingCurrent = (currentId) => loadoutState.weapons.all.filter(val => val !== currentId);
-        
-        // Primary Slot
-        applyDropdownRestriction('primary-weapon-select', primarySecondaryAllowedIds, true, selectedWeaponsExcludingCurrent(loadoutState.weapons.primary));
-        
-        // Secondary Slot
-        applyDropdownRestriction('secondary-weapon-select', primarySecondaryAllowedIds, true, selectedWeaponsExcludingCurrent(loadoutState.weapons.secondary));
-
-        // Backup Slot (Has its own complex rules)
-        let backupAllowedIds = [];
-        if (loadoutState.isHeavyWeapons) {
-            // RULE: Heavy Weapons Augment is ON -> Heavy Weapons + Fists
-            backupAllowedIds = [...WEAPON_HEAVY_IDS, "23"]; 
-        } else {
-            // RULE: Heavy Weapons Augment is OFF -> Default Backup List
-            backupAllowedIds = WEAPON_BACKUP_DEFAULT_IDS;
-        }
-        
-        // Note: Backup slot still respects overall uniqueness (e.g., if Fists is in Backup, it can't be in Primary).
-        applyDropdownRestriction('backup-weapon-select', backupAllowedIds, true, selectedWeaponsExcludingCurrent(loadoutState.weapons.backup));
-    }
-
-
-    /**
-     * Applies Ammo restrictions based on Weapon and Technician Augment. (Logic from previous step, kept for completeness)
+     * Applies new Ammo restrictions based on Weapon and Technician Augment.
      */
     function applyAmmoRestrictions() {
         
@@ -217,17 +125,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentAmmoValue = ammoSelect.value;
             
             if (weaponId === WEAPON_WARRANT) {
+                // RULE 3: Warrant Weapon Restriction
                 allowedAmmoIds = new Set(WARRANT_DEFAULT_AMMO_IDS);
+                
+                // RULE 4: Warrant + Technician
                 if (loadoutState.isTechnician) {
                     allowedAmmoIds.add(WARRANT_TECHNICIAN_AMMO_ID);
                 }
             } else {
+                // RULE 1: Default Ammo Restriction
                 allowedAmmoIds = new Set(DEFAULT_GENERAL_AMMO_IDS);
                 
+                // RULE 2: Technician Override (General)
                 if (loadoutState.isTechnician) {
-                    const excludedGrenades = [...WARRANT_DEFAULT_AMMO_IDS, WARRANT_TECHNICIAN_AMMO_ID];
-                    Object.values(allData.Ammo).forEach(id => {
-                        if (!excludedGrenades.includes(String(id))) {
+                    // Add ALL ammo IDs if Technician is equipped (excluding Warrant-specific grenades)
+                    Object.values(allAmmoData).forEach(id => {
+                        // Prevent adding grenade IDs 38, 39, 41, 40 to general pool
+                        if (![...WARRANT_DEFAULT_AMMO_IDS, WARRANT_TECHNICIAN_AMMO_ID].includes(String(id))) {
                              allowedAmmoIds.add(String(id));
                         }
                     });
@@ -236,12 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Apply restrictions to the dropdown
             Array.from(ammoSelect.options).forEach(option => {
-                if (option.value === "") { 
+                if (option.value === "") { // Keep 'Select Ammo' option enabled
                     option.disabled = false;
                 } else {
                     const isAllowed = allowedAmmoIds.has(option.value);
                     option.disabled = !isAllowed;
                     
+                    // If the currently selected ammo is now disabled, clear the selection
                     if (!isAllowed && option.value === currentAmmoValue) {
                         ammoSelect.value = "";
                     }
@@ -254,7 +169,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Changes slot names based on equipped augments. (Logic from previous step, kept for completeness)
+     * Applies restrictions to dropdown options based on the current loadoutState.
+     */
+    function applyRestrictions() {
+        
+        // 1. Augment Uniqueness
+        const selectedAugments = loadoutState.augments;
+        AUGMENT_SELECTS.forEach(currentSelectId => {
+            const currentSelect = document.getElementById(currentSelectId);
+            const currentValue = currentSelect.value;
+            
+            Array.from(currentSelect.options).forEach(option => {
+                if (option.value === currentValue || option.value === "") {
+                    option.disabled = false;
+                    return;
+                }
+                option.disabled = selectedAugments.includes(option.value);
+            });
+        });
+
+        // 2. Mod Uniqueness (Per Weapon)
+        function applyModUniqueness(modSelects, selectedMods) {
+            modSelects.forEach(currentSelectId => {
+                const currentSelect = document.getElementById(currentSelectId);
+                const currentValue = currentSelect.value;
+                
+                Array.from(currentSelect.options).forEach(option => {
+                    if (option.value === currentValue || option.value === "") {
+                        option.disabled = false;
+                        return;
+                    }
+                    option.disabled = selectedMods.includes(option.value);
+                });
+            });
+        }
+        applyModUniqueness(SECONDARY_MOD_SELECTS, loadoutState.modsSecondary);
+        applyModUniqueness(PRIMARY_MOD_SELECTS, loadoutState.modsPrimary);
+        
+        // 3. Weapon/Device Uniqueness (Conditional with Versatile)
+        const allowDuplicates = loadoutState.isVersatile;
+
+        function applyUniquenessCheck(selectIds, selectedValues) {
+            selectIds.forEach(currentSelectId => {
+                const currentSelect = document.getElementById(currentSelectId);
+                const currentValue = currentSelect.value;
+
+                Array.from(currentSelect.options).forEach(option => {
+                    if (option.value === currentValue || option.value === "") {
+                        option.disabled = false;
+                        return;
+                    }
+                    
+                    if (!allowDuplicates) {
+                        const selectedCount = selectedValues.filter(val => val === option.value).length;
+                        option.disabled = selectedCount > 0;
+                    } else {
+                        option.disabled = false;
+                    }
+                });
+            });
+        }
+        
+        applyUniquenessCheck(WEAPON_SELECTS, loadoutState.weapons.all);
+        applyUniquenessCheck(DEVICE_SELECTS, loadoutState.devices);
+    }
+    
+    /**
+     * Changes slot names based on equipped augments.
      */
     function updateLabels() {
         // Rename Backup slot to Heavy if Heavy Weapons is equipped
@@ -273,8 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function handleLoadoutChange() {
         updateLoadoutState();
-        applyAvailabilityAndUniquenessRestrictions();
-        applyAmmoRestrictions();
+        applyRestrictions();
+        applyAmmoRestrictions(); // New logic call
         updateLabels();
     }
 
@@ -285,7 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await fetchLoadoutData();
         if (!data) return; 
         
-        allData = data; 
+        // Store Ammo data for restriction checks
+        allAmmoData = data.Ammo; 
 
         // --- Initial Population using fetched data ---
         populateSelect('shell-select', data.Shells);
@@ -293,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         AUGMENT_SELECTS.forEach(id => populateSelect(id, data.Augments));
         DEVICE_SELECTS.forEach(id => populateSelect(id, data.Devices));
         
+        // Weapons (Backup is unmoddable, but Primary/Secondary need all mods/ammo)
         populateSelect('backup-weapon-select', data.Weapons);
         populateSelect('secondary-weapon-select', data.Weapons);
         populateSelect('primary-weapon-select', data.Weapons);
