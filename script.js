@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUGMENT_HEAVY_WEAPONS = "19";   
     const AUGMENT_NEURO_HACKER = "68";    
     const AUGMENT_EXPERIMENTAL = "17";    
+    const DEVICE_DEADZONE_ID = "10"; // Based on id.json provided
 
     // Lists of element IDs for easy iteration
     const AUGMENT_SELECTS = ['augment-1-select', 'augment-2-select', 'augment-3-select', 'augment-4-select'];
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         augments: [],
         devices: [],
         weapons: { backup: "", secondary: "", primary: "", all: [] },
-        mods: [],
+        mods: { primary: [], secondary: [] }, // Group mods by weapon slot
         isTechnician: false,
         isVersatile: false,
         isHeavyWeapons: false,
@@ -52,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DATA FETCHING & MAPPING ---
 
     async function fetchLoadoutData() {
-        // Ensure these paths are correct for your local environment!
         const ID_URL = 'id.json';
         const WEAPONS_URL = 'weapons.json'; 
         const ATTACHMENTS_URL = 'attachments.json'; 
@@ -66,10 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetch(DEVICES_URL)
             ]);
 
-            // Check for non-200 responses and provide debug info
             const checkResponse = (resp, name) => {
                 if (!resp.ok) {
-                    throw new Error(`Failed to load ${name} (Status: ${resp.status}). Check the file path and ensure a web server is running for local access.`);
+                    throw new Error(`Failed to load ${name} (Status: ${resp.status}). Check file path and ensure a local web server is running.`);
                 }
             };
             checkResponse(idResp, ID_URL);
@@ -92,8 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             
         } catch (error) {
-            console.error("Critical Error during data loading:", error);
-            alert(`Error loading data. See console for details. (Likely file access issue: ${error.message})`);
+            console.error("Critical Error during data loading. The application cannot run.", error);
+            alert(`Error loading data. See console for details. Ensure all files are present and a web server is used for local viewing. Error: ${error.message}`);
             return null;
         }
     }
@@ -112,34 +111,34 @@ document.addEventListener('DOMContentLoaded', () => {
         allData.shells = data.Shells;
         allData.augments = data.Augments;
 
-        // 2. Map external JSON data
-        allData.weapons = data.weapons.map(w => ({ 
+        // 2. Map external JSON data arrays
+        allData.weapons = Array.isArray(data.weapons) ? data.weapons.map(w => ({ 
             ...w, 
             id: idMap[w.name] || w.name, 
-            slot: w.stats.slot, 
+            slot: w.stats?.slot, // Use optional chaining to prevent crash if stats is missing
             name: w.name 
-        }));
+        })) : [];
         
-        allData.devices = data.devices.map(d => ({ 
+        allData.devices = Array.isArray(data.devices) ? data.devices.map(d => ({ 
             ...d, 
             id: idMap[d.name] || d.name,
             isExperimental: d.experimental === "true", 
-            // Static check for Deadzone (ID 10) based on previous logic, which requires Neuro-Hacker
-            isNeuroHackerRequired: (idMap[d.name] === "10") 
-        }));
+            // Check based on the known Deadzone ID from the provided id.json
+            isNeuroHackerRequired: (idMap[d.name] === DEVICE_DEADZONE_ID) 
+        })) : [];
 
-        allData.attachments = data.attachments.map(a => ({ 
+        allData.attachments = Array.isArray(data.attachments) ? data.attachments.map(a => ({ 
             ...a, 
             id: idMap[a.name] || a.name, 
+            type: a.type, // Ensure type is present for filtering
             requiresTechnician: a.technician === "true", 
             compatibility: a.compatibility || [] 
-        }));
+        })) : [];
     }
 
     // --- UTILITY FUNCTIONS ---
 
     function populateSelect(selectElementId, dataArray, defaultTextOverride) {
-        // ... (function remains the same) ...
         const select = document.getElementById(selectElementId);
         if (!select) return;
 
@@ -170,10 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
             all: getValues(WEAPON_SELECTS)
         };
         
-        // Collect ALL selected mod IDs for uniqueness checks across a single weapon
-        const primaryMods = PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
-        const secondaryMods = SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
-        loadoutState.mods = { primary: primaryMods, secondary: secondaryMods };
+        // Collect ALL selected mod IDs, grouped by weapon slot
+        loadoutState.mods.primary = PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
+        loadoutState.mods.secondary = SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value).filter(val => val);
 
         loadoutState.isTechnician = loadoutState.augments.includes(AUGMENT_TECHNICIAN);
         loadoutState.isVersatile = loadoutState.augments.includes(AUGMENT_VERSATILE);
@@ -185,24 +183,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- RESTRICTION LOGIC ---
 
     function applyAugmentRestrictions() {
-        // FIX: Ensure Augments are unique.
+        // FIX: Ensure Augments are unique by checking against augments selected in *other* slots.
         const selectedAugments = loadoutState.augments;
-        const allAugmentIds = Object.keys(allData.augments).map(name => allData.idMap[name]);
 
         AUGMENT_SELECTS.forEach(currentSelectId => {
             const currentSelect = document.getElementById(currentSelectId);
             const currentValue = currentSelect.value;
             
+            // Collect all augment IDs selected in OTHER slots
+            const otherSelectedAugments = selectedAugments.filter(id => id !== currentValue);
+            
             Array.from(currentSelect.options).forEach(option => {
                 const id = option.value;
-                if (id === currentValue || id === "") {
+                
+                if (id === "") { // Always keep the "Select Augment" option enabled
                     option.disabled = false;
                     return;
                 }
                 
-                // Disable if selected in another slot
-                const selectedCount = selectedAugments.filter(val => val === id).length;
-                option.disabled = selectedCount > 0;
+                // Disable the option if its ID is present in the list of augments selected ELSEWHERE.
+                option.disabled = otherSelectedAugments.includes(id);
             });
         });
     }
@@ -234,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return targetSlot === weaponSlot;
                 } 
                 
-                // Versatile is equipped: allows non-Heavy weapons in any non-Heavy slot (Primary, Secondary, Backup)
                 if (loadoutState.isVersatile) {
                     return weaponSlot !== "Heavy" && targetSlot !== "Heavy";
                 }
@@ -242,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             });
             
-            // Apply Uniqueness: All weapons must be unique (Versatile only affects devices)
+            // Apply Uniqueness: All weapons must be unique
             const filteredData = allowedWeapons.filter(weapon => {
                 const selectedCount = selectedWeaponNames.filter(name => name === weapon.name).length;
                 return weapon.id === currentValue || selectedCount === 0;
@@ -253,8 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyDeviceRestrictions() {
-        // FIX: Device uniqueness check.
-        
         let allowedDevices = allData.devices.filter(device => {
             let isAvailable = true;
 
@@ -318,11 +315,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const weaponPrefix = weaponSlot.split('-')[0]; // 'secondary' or 'primary'
                 const selectedModsForWeapon = loadoutState.mods[weaponPrefix];
                 
-                // The current value should not count against itself
+                // Collect mods selected in OTHER mod slots for the same weapon
                 const otherSelectedMods = selectedModsForWeapon.filter(id => id !== currentSelect.value);
 
                 const filteredData = allowedAttachments.filter(att => {
-                    // FIX: Check against otherSelectedMods
                     const isSelected = otherSelectedMods.includes(att.id);
                     
                     // Keep the current selection enabled, and everything else filtered by uniqueness
@@ -352,20 +348,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleLoadoutChange() {
         updateLoadoutState();
         
-        // 1. Apply augment uniqueness (Highest priority fix)
         applyAugmentRestrictions(); 
-        
-        // 2. Apply complex weapon/device filters
         applyWeaponRestrictions(); 
         applyDeviceRestrictions();
         
-        // 3. Update labels (must run before attachments)
         updateLabels();
         
-        // 4. Apply attachments (depends on current weapon/augment state)
         applyAttachmentRestrictions();
         
-        // Final pass to ensure cascading dependency updates (e.g. if a weapon was cleared)
+        // Final pass for cascading dependency updates (e.g. if a weapon was cleared, its attachments must be cleared)
         updateLoadoutState();
         applyAttachmentRestrictions();
     }
