@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 "20":"heavy", // Hole-Punch
 "21":"secondary", // Double-Tap
 "22":"backup", // Dusters
-"23":"backup" // Fists
+"23":"backup", // Fists
+"23":"heavy" // Fists
 
     };
 
@@ -336,11 +337,22 @@ document.addEventListener('DOMContentLoaded', () => {
         populateWeaponSelect('backup-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
 
         // 2. Mod uniqueness check (already in original script)
-        function applyModUniqueness(selectIds, selectedValues) { /* ... original logic ... */ }
-        // Assuming original applyModUniqueness is here and working
-
-        // 3. Weapon/Device Uniqueness (Custom logic: Versatile allows duplicate devices, NOT weapons)
-        const allEquippedItems = [...loadoutState.devices, ...loadoutState.weapons.all];
+         function applyModUniqueness(modSelects, selectedMods) {
+            modSelects.forEach(currentSelectId => {
+                const currentSelect = document.getElementById(currentSelectId);
+                const currentValue = currentSelect.value;
+                
+                Array.from(currentSelect.options).forEach(option => {
+                    if (option.value === currentValue || option.value === "") {
+                        option.disabled = false;
+                        return;
+                    }
+                    option.disabled = selectedMods.includes(option.value);
+                });
+            });
+        }
+        applyModUniqueness(SECONDARY_MOD_SELECTS, loadoutState.modsSecondary);
+        applyModUniqueness(PRIMARY_MOD_SELECTS, loadoutState.modsPrimary);
         
         WEAPON_SELECTS.forEach(currentSelectId => {
              const currentSelect = document.getElementById(currentSelectId);
