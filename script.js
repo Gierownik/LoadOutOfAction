@@ -124,8 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (selectId === 'backup-weapon-select') {
             // Renames the slot based on the augment
             slotName = isHeavyWeaponsAugment ? 'Heavy' : 'Backup';
-            // Heavy Weapons augment allows both 'backup' and 'heavy' weapon types
-            allowedCategories = isHeavyWeaponsAugment ? ['backup', 'heavy'] : ['backup'];
+            allowedCategories = isHeavyWeaponsAugment ? ['heavy'] : ['backup'];
 
             // Rename the label dynamically
             const label = document.querySelector(`label[for="${selectId}"]`);
@@ -135,6 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             return;
         }
+        if (isVersatile && (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select')) {
+        allowedCategories = ['backup', 'secondary', 'primary'];
+        }
+
 
         // allWeaponsMap is {ID: Name}
         for (const [id, name] of Object.entries(allWeaponsMap)) {
