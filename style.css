@@ -94,7 +94,12 @@ select {
     border-radius: 0.5px;
     border: 0.25em solid rgba(143, 255, 237, 0.7);
     flex-grow: 1;
-    background-color: rgba(143, 255, 237, 0.25);
+    background-color: rgba(143, 255, 237, 0.15);
+    color: rgba(143, 255, 237, 0.85);
+}
+option {
+    color: rgba(143, 255, 237, 0.85) !important; /* Makes the text gray */
+    background-color: rgba(143, 255, 237, 0.2); /* Light background to visually distinguish it */
 }
 
 .separator {
@@ -119,7 +124,7 @@ select {
 /* Custom styling for unselectable (disabled) options */
 option:disabled {
     color: rgba(143, 255, 237, 0.3) !important; /* Makes the text gray */
-    background-color: rgba(143, 255, 237, 0.2); /* Light background to visually distinguish it */
+    background-color: rgba(143, 255, 237, 0.1); /* Light background to visually distinguish it */
     font-style: italic;
     cursor: not-allowed;
 }
