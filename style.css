@@ -1,10 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+.orbitron{
+  font-family: "Orbitron", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  opacity: .9999999;
+}
+
 body {
     font-family: Orbitron;
     background-color: #000000;
     color: rgba(143, 255, 237, 0.85);
     margin: 0;
     padding: 20px;
+    letter-spacing: 0.1em;
 }
 
 .container {
