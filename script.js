@@ -363,6 +363,35 @@ document.addEventListener('DOMContentLoaded', () => {
                  currentSelect.classList.remove('invalid-selection');
              }
         });
+AUGMENT_SELECTS.forEach(selectId => {
+    const select = document.getElementById(selectId);
+    const currentValue = select.value;
+
+    Array.from(select.options).forEach(option => {
+        const augmentId = option.value;
+
+        // --- Already selected in another slot? ---
+        const otherAugments = AUGMENT_SELECTS
+            .filter(id => id !== selectId)
+            .map(id => document.getElementById(id)?.value);
+
+        const alreadySelected = otherAugments.includes(augmentId);
+
+        // Apply disable
+        if (augmentId !== currentValue) {
+            option.disabled = alreadySelected;
+            option.title = alreadySelected ? 'Already equipped in another slot.' : '';
+        }
+
+        // Mark invalid if current selection is invalid
+        if (augmentId === currentValue && alreadySelected) {
+            select.classList.add('invalid-selection');
+        } else if (augmentId === currentValue) {
+            select.classList.remove('invalid-selection');
+        }
+    });
+});
+
         // 2. Device Augment Requirements (Neurohacker and Experimental)
         DEVICE_SELECTS.forEach(selectId => {
             const select = document.getElementById(selectId);
