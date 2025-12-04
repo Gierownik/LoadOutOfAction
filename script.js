@@ -116,18 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let slotName = '';
 
         if (selectId === 'secondary-weapon-select') {
-            if (isVersatile == true) {
-                allowedCategories = ['primary','secondary','backup'];
-            } else {    
-                allowedCategories = ['secondary'];
-            }  
-            slotName = 'Secondary';   
+            allowedCategories = ['secondary'];
+            slotName = 'Secondary';
         } else if (selectId === 'primary-weapon-select') {
-            if (isVersatile == true) {
-                allowedCategories = ['primary','secondary','backup'];
-            } else {    
-                allowedCategories = ['primary'];
-            } 
+            allowedCategories = ['primary'];
             slotName = 'Primary';
         } else if (selectId === 'backup-weapon-select') {
             // Renames the slot based on the augment
