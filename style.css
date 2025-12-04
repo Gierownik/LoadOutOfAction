@@ -90,9 +90,6 @@ h3 {
 }
 
 select {
-    -webkit-appearance: none; /* Chrome/Safari */
-    -moz-appearance: none;    /* Firefox */
-    appearance: none;         /* Standard */
     padding: 8px;
     border-radius: 0.5px;
     border: 0.25em solid rgba(143, 255, 237, 0.7);
