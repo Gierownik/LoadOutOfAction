@@ -382,16 +382,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     shouldDisable = true;
                     restrictionReason = 'Requires the Experimental Augment.';
                 }
-                if (loadoutState.devices[0] == loadoutState.devices[1]) {
-                    shouldDisable = true;
-                    restrictionReason = 'Already Equipped';
-                } 
+                const otherDeviceValues = DEVICE_SELECTS
+                    .filter(id => id !== selectId)
+                    .map(id => document.getElementById(id)?.value);
 
-                // Apply restriction (except to the current selection, which is instead marked invalid below)
+                if (otherDeviceValues.includes(option.value)) {
+                    shouldDisable = true;
+                    restrictionReason = 'Already Equipped in another slot.';
+                }
+
+        // Apply the disable and tooltip
                 if (option.value !== currentValue) {
                     option.disabled = shouldDisable;
                     option.title = shouldDisable ? restrictionReason : '';
                 }
+
                 
                 // If current selection is invalid, mark the select element
                 if (option.value === currentValue && shouldDisable) {
