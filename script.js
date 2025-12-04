@@ -336,24 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Rename Backup slot and filter weapons (must run first to ensure select options are correct)
         populateWeaponSelect('backup-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
 
-        // 2. Mod uniqueness check (already in original script)
-         function applyModUniqueness(modSelects, selectedMods) {
-            modSelects.forEach(currentSelectId => {
-                const currentSelect = document.getElementById(currentSelectId);
-                const currentValue = currentSelect.value;
-                
-                Array.from(currentSelect.options).forEach(option => {
-                    if (option.value === currentValue || option.value === "") {
-                        option.disabled = false;
-                        return;
-                    }
-                    option.disabled = selectedMods.includes(option.value);
-                });
-            });
-        }
-        applyModUniqueness(SECONDARY_MOD_SELECTS, loadoutState.modsSecondary);
-        applyModUniqueness(PRIMARY_MOD_SELECTS, loadoutState.modsPrimary);
-        
         WEAPON_SELECTS.forEach(currentSelectId => {
              const currentSelect = document.getElementById(currentSelectId);
              const currentValue = currentSelect?.value;
