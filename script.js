@@ -356,8 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyLoadoutRestrictions() {
         updateLoadoutState();
 
-        // 1. Rename Backup slot and filter weapons (must run first to ensure select options are correct)
+        // Rebuild all weapon selects based on augments
         populateWeaponSelect('backup-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
+        populateWeaponSelect('secondary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
+        populateWeaponSelect('primary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
+
+        // ...keep your uniqueness enforcement on weapons here (no duplicates across slots)...
 
         WEAPON_SELECTS.forEach(currentSelectId => {
              const currentSelect = document.getElementById(currentSelectId);
