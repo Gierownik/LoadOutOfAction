@@ -94,12 +94,12 @@ select {
     border-radius: 0.5px;
     border: 0.25em solid rgba(143, 255, 237, 0.7);
     flex-grow: 1;
-    background-color: hsl(170, 43.9%, 20%);
+    background-color: hsl(170, 25%, 20%);
     color: rgba(143, 255, 237, 0.85);
 }
 select option {
     color: rgba(143, 255, 237, 0.85) !important; /* Makes the text gray */
-    background-color: hsl(170, 43.9%, 20%); /* Light background to visually distinguish it */
+    background-color: hsl(170, 25%, 20%); /* Light background to visually distinguish it */
 }
 
 .separator {
