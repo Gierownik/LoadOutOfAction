@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .filter(id => id !== selectId)
                     .map(id => document.getElementById(id)?.value);
 
-                if (otherDeviceValues.includes(option.value)) {
+                if (otherDeviceValues.includes(option.value) && !loadoutState.isVersatile) {
                     shouldDisable = true;
                     restrictionReason = 'Already Equipped in another slot.';
                 }
