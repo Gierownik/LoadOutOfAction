@@ -109,50 +109,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // New helper function to populate weapon selects with category filtering and slot renaming
     function populateWeaponSelect(selectId, allWeaponsMap, weaponCategories, isHeavyWeaponsAugment) {
-        const select = document.getElementById(selectId);
-        if (!select) return;
+    const select = document.getElementById(selectId);
+    if (!select) return;
 
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">--- Select Weapon ---</option>';
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">--- Select Weapon ---</option>';
 
-        let allowedCategories = [];
-        let slotName = '';
+    let allowedCategories = [];
+    let slotName = '';
 
-        if (selectId === 'secondary-weapon-select') {
-            allowedCategories = ['secondary'];
-            slotName = 'Secondary';
-        } else if (selectId === 'primary-weapon-select') {
-            allowedCategories = ['primary'];
-            slotName = 'Primary';
-        } else if (selectId === 'backup-weapon-select') {
-            // Renames the slot based on the augment
-            slotName = isHeavyWeaponsAugment ? 'Heavy' : 'Backup';
-            allowedCategories = isHeavyWeaponsAugment ? ['heavy'] : ['backup'];
+    if (selectId === 'secondary-weapon-select') {
+        allowedCategories = ['secondary'];
+        slotName = 'Secondary';
+    } else if (selectId === 'primary-weapon-select') {
+        allowedCategories = ['primary'];
+        slotName = 'Primary';
+    } else if (selectId === 'backup-weapon-select') {
+        slotName = isHeavyWeaponsAugment ? 'Heavy' : 'Backup';
+        allowedCategories = isHeavyWeaponsAugment ? ['heavy'] : ['backup'];
+        const label = document.querySelector(`label[for="${selectId}"]`);
+        if (label) label.textContent = slotName + ' :';
+    }
 
-            // Rename the label dynamically
-            const label = document.querySelector(`label[for="${selectId}"]`);
-            if (label) {
-                label.textContent = slotName + ' :';
-            }
-        } else {
-            return;
-        }
-
-
-        // allWeaponsMap is {ID: Name}
-        for (const [id, name] of Object.entries(allWeaponsMap)) {
-            const category = weaponCategories[id];
-            if (category && allowedCategories.includes(category)) {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = name;
-                if (id === currentValue) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            }
+    // --- Augment restrictions ---
+    if (loadoutState.isProfessional) {
+        allowedCategories = allowedCategories.filter(c => c !== 'primary');
+    }
+    if (loadoutState.isStudied) {
+        allowedCategories = allowedCategories.filter(c => c !== 'primary' && c !== 'secondary');
+    }
+    if (loadoutState.isVersatile) {
+        // Versatile overrides: allow backup, secondary, primary in both primary & secondary slots
+        if (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select') {
+            allowedCategories = ['primary', 'secondary', 'backup'];
         }
     }
+
+    // Populate options
+    for (const [id, name] of Object.entries(allWeaponsMap)) {
+        const category = weaponCategories[id];
+        if (category && allowedCategories.includes(category)) {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = name;
+            if (id === currentValue) option.selected = true;
+            select.appendChild(option);
+        }
+    }
+}
+
 
     /**
      * Function to filter and populate attachment selects based on augments and weapon compatibility.
@@ -328,6 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loadoutState.isHeavyWeapons = loadoutState.augments.includes(AUGMENT_HEAVY_WEAPONS);
         loadoutState.isExperimental = loadoutState.augments.includes(AUGMENT_EXPERIMENTAL);
         loadoutState.isNeurohacker = loadoutState.augments.includes(AUGMENT_NEUROHACKER);
+        loadoutState.isProfessional = loadoutState.augments.includes(AUGMENT_PROFESSIONAL);
+        loadoutState.isStudied = loadoutState.augments.includes(AUGMENT_STUDIED);
+
     }
     
     /**
