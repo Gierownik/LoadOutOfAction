@@ -109,55 +109,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // New helper function to populate weapon selects with category filtering and slot renaming
     function populateWeaponSelect(selectId, allWeaponsMap, weaponCategories, isHeavyWeaponsAugment) {
-    const select = document.getElementById(selectId);
-    if (!select) return;
+        const select = document.getElementById(selectId);
+        if (!select) return;
 
-    const currentValue = select.value;
-    select.innerHTML = '<option value="">--- Select Weapon ---</option>';
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">--- Select Weapon ---</option>';
 
-    let allowedCategories = [];
-    let slotName = '';
+        let allowedCategories = [];
+        let slotName = '';
 
-    if (selectId === 'secondary-weapon-select') {
-        allowedCategories = ['secondary'];
-        slotName = 'Secondary';
-    } else if (selectId === 'primary-weapon-select') {
-        allowedCategories = ['primary'];
-        slotName = 'Primary';
-    } else if (selectId === 'backup-weapon-select') {
-        slotName = isHeavyWeaponsAugment ? 'Heavy' : 'Backup';
-        allowedCategories = isHeavyWeaponsAugment ? ['heavy'] : ['backup'];
-        const label = document.querySelector(`label[for="${selectId}"]`);
-        if (label) label.textContent = slotName + ' :';
-    }
+        // Base slot defaults
+        if (selectId === 'secondary-weapon-select') {
+            allowedCategories = ['secondary'];
+            slotName = 'Secondary';
+        } else if (selectId === 'primary-weapon-select') {
+            allowedCategories = ['primary'];
+            slotName = 'Primary';
+        } else if (selectId === 'backup-weapon-select') {
+            slotName = isHeavyWeaponsAugment ? 'Heavy' : 'Backup';
+            allowedCategories = isHeavyWeaponsAugment ? ['heavy'] : ['backup'];
+            const label = document.querySelector(`label[for="${selectId}"]`);
+            if (label) label.textContent = slotName + ' :';
+        } else {
+            return;
+        }
 
-    // --- Augment restrictions ---
-    if (loadoutState.isVersatile) {
-        if (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select') {
+        // Augment rules
+        // Versatile: primary & secondary slots can equip backup, secondary, primary
+        if (loadoutState.isVersatile && (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select')) {
             allowedCategories = ['primary', 'secondary', 'backup'];
-         }
-    } else {
-        if (loadoutState.isProfessional) {
-            allowedCategories = allowedCategories.filter(c => c !== 'primary');
         }
-        else if (loadoutState.isStudied) {
+
+        // Studied removes primary and secondary everywhere (including versatile-expanded lists)
+        if (loadoutState.isStudied) {
             allowedCategories = allowedCategories.filter(c => c !== 'primary' && c !== 'secondary');
+        } else {
+            // Professional removes primary everywhere (except backup which doesn't have primary anyway)
+            if (loadoutState.isProfessional) {
+                allowedCategories = allowedCategories.filter(c => c !== 'primary');
+            }
+        }
+
+        // Populate options
+        for (const [id, name] of Object.entries(allWeaponsMap)) {
+            const category = weaponCategories[id];
+            if (category && allowedCategories.includes(category)) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = name;
+                if (id === currentValue) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+
+        // If prior selection is no longer allowed, clear it
+        if (currentValue && !select.querySelector(`option[value="${currentValue}"]`)) {
+            select.value = "";
         }
     }
 
-
-    // Populate options
-    for (const [id, name] of Object.entries(allWeaponsMap)) {
-        const category = weaponCategories[id];
-        if (category && allowedCategories.includes(category)) {
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = name;
-            if (id === currentValue) option.selected = true;
-            select.appendChild(option);
-        }
-    }
-}
 
 
     /**
@@ -442,16 +452,22 @@ AUGMENT_SELECTS.forEach(selectId => {
         DEVICE_SELECTS.forEach(selectId => {
             const select = document.getElementById(selectId);
             const currentValue = select.value;
-            
+            if (!select) return;
+
+            const otherDeviceValues = DEVICE_SELECTS
+                .filter(id => id !== selectId)
+                .map(id => document.getElementById(id)?.value);
+
             Array.from(select.options).forEach(option => {
-                const deviceName = option.textContent; 
-                let requiresNeurohacker = [DEVICE_LOCKDOWN_NAME, DEVICE_CASCADE_NAME, DEVICE_PATHOGEN_NAME].includes(deviceName);
-                // Check experimental status read from devices.json
-                let requiresExperimental = allDevicesData.some(d => d.name === deviceName && d.experimental === "true");
-                
+                const deviceName = option.textContent;
+
+                const requiresNeurohacker = [DEVICE_LOCKDOWN_NAME, DEVICE_CASCADE_NAME, DEVICE_PATHOGEN_NAME].includes(deviceName);
+                const requiresExperimental = allDevicesData.some(d => d.name === deviceName && d.experimental === "true");
+
                 let shouldDisable = false;
                 let restrictionReason = '';
 
+                // Base requirements
                 if (requiresNeurohacker && !loadoutState.isNeurohacker) {
                     shouldDisable = true;
                     restrictionReason = 'Requires the Neurohacker Augment.';
@@ -459,45 +475,31 @@ AUGMENT_SELECTS.forEach(selectId => {
                     shouldDisable = true;
                     restrictionReason = 'Requires the Experimental Augment.';
                 }
-                const otherDeviceValues = DEVICE_SELECTS
-                    .filter(id => id !== selectId)
-                    .map(id => document.getElementById(id)?.value);
 
-                if (otherDeviceValues.includes(option.value) && !loadoutState.isVersatile) {
+                // Uniqueness (unless Versatile allows duplicates)
+                const isDuplicate = otherDeviceValues.includes(option.value);
+                if (isDuplicate && !loadoutState.isVersatile) {
                     shouldDisable = true;
                     restrictionReason = 'Already Equipped in another slot.';
                 }
 
-        // Apply the disable and tooltip
+                // Studied restriction: only allow specific devices
+                if (loadoutState.isStudied) {
+                    const allowedStudiedDevices = ["Bolster", "Overcharge", "Shroud", "Reserve Stim"];
+                    const isAllowedByStudied = allowedStudiedDevices.includes(deviceName);
+                    if (!isAllowedByStudied) {
+                        shouldDisable = true;
+                        restrictionReason = 'Studied restricts devices to Bolster, Overcharge, Shroud, Reserve Stim.';
+                    }
+                }
+
+                // Apply the disable and tooltip (don’t change current option to avoid flicker)
                 if (option.value !== currentValue) {
                     option.disabled = shouldDisable;
                     option.title = shouldDisable ? restrictionReason : '';
                 }
-                if (loadoutState.isStudied) {
-                    const allowedStudiedDevices = ["Bolster", "Overcharge", "Shroud", "Reserve Stim"];
-                    DEVICE_SELECTS.forEach(selectId => {
-                        const select = document.getElementById(selectId);
-                        if (!select) return;
-                        const currentValue = select.value;
 
-                        Array.from(select.options).forEach(option => {
-                            const deviceName = option.textContent;
-                            const shouldDisable = !allowedStudiedDevices.includes(deviceName);
-                            option.disabled = shouldDisable;
-                            option.title = shouldDisable ? "Studied augment restricts to specific devices." : "";
-                        });
-
-                        if (currentValue && !allowedStudiedDevices.includes(currentValue)) {
-                            select.classList.add("invalid-selection");
-                        } else {
-                            select.classList.remove("invalid-selection");
-                        }
-                    });
-                }
-
-
-                
-                // If current selection is invalid, mark the select element
+                // Mark invalid if current selection is now illegal
                 if (option.value === currentValue && shouldDisable) {
                     select.classList.add('invalid-selection');
                 } else if (option.value === currentValue) {
@@ -505,6 +507,7 @@ AUGMENT_SELECTS.forEach(selectId => {
                 }
             });
         });
+
 
         // 5. Attachment Augment and Compatibility Requirements
         // Map selected weapon ID to its Name (e.g., "1" -> "Major")
