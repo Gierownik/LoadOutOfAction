@@ -1,7 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
 body {
-    font-family: sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    font-family: Orbitron;
+    background-color: #000000;
+    color: rgba(143, 255, 237, 0.85);
     margin: 0;
     padding: 20px;
 }
@@ -9,7 +10,7 @@ body {
 .container {
     max-width: 900px;
     margin: 0 auto;
-    background-color: #fff;
+    background-color: #1d1d1d;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -17,18 +18,18 @@ body {
 
 h1 {
     text-align: center;
-    color: #007bff;
+    color: rgba(143, 255, 237, 1);
     margin-bottom: 30px;
 }
 
 h2 {
-    color: #555;
+    color: rgba(143, 255, 237, 0.85);
     font-size: 1.2em;
 }
 
 h3 {
     text-align: center;
-    color: #28a745;
+    color: rgba(143, 255, 237, 0.85);
     margin-bottom: 20px;
 }
 
@@ -55,7 +56,8 @@ h3 {
 
 .weapon-column {
     flex: 1;
-    border: 1px solid #ddd;
+    background-color: rgba(143, 255, 237, 0.02);
+    border: 1px solid rgba(143, 255, 237, 0.05);
     padding: 15px;
 }
 
@@ -80,21 +82,22 @@ h3 {
 
 select {
     padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    border-radius: 0.5px;
+    border: 0.25em solid rgba(143, 255, 237, 0.7);
     flex-grow: 1;
-    background-color: #fff;
+    background-color: rgba(143, 255, 237, 0.25);
 }
 
 .separator {
     border: 0;
-    height: 1px;
-    background: #ddd;
+    height: 0.5em;
+    background: rgba(143, 255, 237, 0.65);
     margin: 30px 0;
 }
 
 .section-header {
-    border-bottom: 2px solid #007bff;
+    background-color: rgba(143, 255, 237, 0.25);
+    border-left: 0.2em solid rgba(143, 255, 237, 0.1);
     margin-bottom: 20px;
     padding-bottom: 5px;
 }
@@ -106,8 +109,8 @@ select {
 
 /* Custom styling for unselectable (disabled) options */
 option:disabled {
-    color: #999 !important; /* Makes the text gray */
-    background-color: #f8f8f8; /* Light background to visually distinguish it */
+    color: rgba(143, 255, 237, 0.3) !important; /* Makes the text gray */
+    background-color: rgba(143, 255, 237, 0.2); /* Light background to visually distinguish it */
     font-style: italic;
     cursor: not-allowed;
 }
