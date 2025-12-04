@@ -87,7 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentValue = select.value;
         select.innerHTML = '<option value="">--- Select ---</option>';
 
-        const items = Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name }));
+        const items = (Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name })))
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+
 
         items.forEach(item => {
             const id = item.id || item.name;
