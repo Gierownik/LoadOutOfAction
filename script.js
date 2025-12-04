@@ -131,10 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (label) {
                 label.textContent = slotName + ' :';
             }
-        } 
-
-        if (isVersatileAugment && (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select')) {
-        allowedCategories = ['backup', 'secondary', 'primary', 'heavy'];
+        } else {
+            return;
         }
 
 
@@ -273,10 +271,10 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSelect('device-2-select', allDevicesData);
         
         // Weapons (Initial call without Heavy Weapons augment)
-        populateWeaponSelect('secondary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons, loadoutState.isVersatile);
-        populateWeaponSelect('primary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons, loadoutState.isVersatile);
-        populateWeaponSelect('backup-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons, loadoutState.isVersatile);
-
+        const allWeaponsMapNameID = data.Weapons || {};
+        populateWeaponSelect('backup-weapon-select', allWeaponsData, WEAPON_CATEGORIES, false);
+        populateWeaponSelect('secondary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, false);
+        populateWeaponSelect('primary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, false);
 
         // Populate attachments (temporarily populate with all, filtering will happen in applyLoadoutRestrictions)
         populateSelect('secondary-optic-select', data.Optics);
