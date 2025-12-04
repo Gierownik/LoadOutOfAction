@@ -7,18 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUGMENT_VERSATILE = "61";       // Allows duplicate devices, but NOT weapons (new logic)
     const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot and allows heavy weapons
     const AUGMENT_EXPERIMENTAL = "17";    // Required for experimental devices
-    const AUGMENT_NEUROHACKER = "38";     // Placeholder ID for Neurohacker (assumed next ID)
-    const WEAPON_WARRANT = "12";          // Special ammo rules apply
+    const AUGMENT_NEUROHACKER = "68";     // Placeholder ID for Neurohacker (assumed next ID)
     
     // Device Names requiring Neurohacker (since IDs are unavailable)
     const DEVICE_LOCKDOWN_NAME = "Lockdown";
     const DEVICE_CASCADE_NAME = "Cascade";
     const DEVICE_PATHOGEN_NAME = "Pathogen";
-    
-    // Ammo ID Lists (based on id.json)
-    const DEFAULT_GENERAL_AMMO_IDS = ["21", "20", "19", "26", "35"]; // Shred, Heavy, Piercing, Standard, TD Ammo
-    const WARRANT_DEFAULT_AMMO_IDS = ["38", "39", "41"];             // Standard, Impact, Proximity Grenade
-    const WARRANT_TECHNICIAN_AMMO_ID = "40";                         // Incendiary Grenade
     
     let allAmmoData = {};       // Stores all Ammo data fetched from JSON
     let allWeaponsData = {};    // Stores Weapon ID: Name map (from id.json)
@@ -28,11 +22,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
     const WEAPON_CATEGORIES = {
-        // Examples (replace with actual IDs from id.json)
-        "1": "secondary", "2": "primary", "3": "secondary", "4": "backup", 
-        "5": "heavy", "6": "primary", "7": "backup", "8": "secondary", 
-        "9": "primary", "10": "heavy", "11": "secondary", "12": "backup", // Warrant: 12
-        // ... add all weapon IDs and their categories here ...
+        "2":"secondary", // Major
+"3":"secondary", // Deckard
+"7":"primary", // Icarus
+"6":"primary", // Master-Key
+"5":"secondary", // Cerberus
+"9":"primary", // Vigil
+"1":"backup", // TTK
+"8":"primary", // Custodian
+"4":"secondary", // Geist
+"10":"primary", // Inhibitor
+"11":"primary", // Sentinel
+"12":"primary", // Warrant
+"13":"primary", // Helix
+"14":"primary", // Nexus
+"15":"heavy", // Umibozu
+"16":"heavy", // Blackout
+"17":"backup", // Akanami
+"18":"primary", // Typhon
+"19":"secondary", // Omen
+"20":"heavy", // Hole-Punch
+"21":"secondary", // Double-Tap
+"22":"backup", // Dusters
+"23":"backup" // Fists
+
     };
 
     // Lists of element IDs for easy iteration
