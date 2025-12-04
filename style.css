@@ -124,7 +124,7 @@ select option {
 /* Custom styling for unselectable (disabled) options */
 option:disabled {
     color: rgba(143, 255, 237, 0.3) !important; /* Makes the text gray */
-    background-color: hsl(170, 43.9, 15); /* Light background to visually distinguish it */
+    background-color: hsl(168, 19%, 21%); /* Light background to visually distinguish it */
     font-style: italic;
     cursor: not-allowed;
 }
