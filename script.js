@@ -471,6 +471,28 @@ AUGMENT_SELECTS.forEach(selectId => {
                     option.disabled = shouldDisable;
                     option.title = shouldDisable ? restrictionReason : '';
                 }
+                if (loadoutState.isStudied) {
+    const allowedStudiedDevices = ["Bolster", "Overcharge", "Shroud", "Reserve Stim"];
+    DEVICE_SELECTS.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const currentValue = select.value;
+
+        Array.from(select.options).forEach(option => {
+            const deviceName = option.textContent;
+            const shouldDisable = !allowedStudiedDevices.includes(deviceName);
+            option.disabled = shouldDisable;
+            option.title = shouldDisable ? "Studied augment restricts to specific devices." : "";
+        });
+
+        if (currentValue && !allowedStudiedDevices.includes(currentValue)) {
+            select.classList.add("invalid-selection");
+        } else {
+            select.classList.remove("invalid-selection");
+        }
+    });
+}
+
 
                 
                 // If current selection is invalid, mark the select element
