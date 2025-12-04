@@ -97,7 +97,7 @@ select {
     background-color: rgba(143, 255, 237, 0.15);
     color: rgba(143, 255, 237, 0.85);
 }
-option {
+select option {
     color: hsl(170, 43.9, 20) !important; /* Makes the text gray */
     background-color: rgba(143, 255, 237, 0.2); /* Light background to visually distinguish it */
 }
