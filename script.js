@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot and allows heavy weapons
     const AUGMENT_EXPERIMENTAL = "17";    // Required for experimental devices
     const AUGMENT_NEUROHACKER = "68";     // Placeholder ID for Neurohacker (assumed next ID)
+    const AUGMENT_PROFESSIONAL = "50"; // replace with actual ID
+    const AUGMENT_STUDIED = "76";      // replace with actual ID
+
     
     // Device Names requiring Neurohacker (since IDs are unavailable)
     const DEVICE_LOCKDOWN_NAME = "Lockdown";
