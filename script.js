@@ -363,6 +363,39 @@ document.addEventListener('DOMContentLoaded', () => {
                  currentSelect.classList.remove('invalid-selection');
              }
         });
+        function applyModRestrictions(modSelectIds) {
+    // Collect currently selected mods
+    const selectedMods = modSelectIds
+        .map(id => document.getElementById(id)?.value)
+        .filter(val => val);
+
+    modSelectIds.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const currentValue = select.value;
+
+        Array.from(select.options).forEach(option => {
+            if (!option.value) return; // skip placeholder
+
+            const isSelectedElsewhere =
+                selectedMods.includes(option.value) && option.value !== currentValue;
+
+            option.disabled = isSelectedElsewhere;
+            option.title = isSelectedElsewhere
+                ? "Already equipped in another mod slot."
+                : "";
+        });
+
+        // Mark invalid if current selection is duplicated
+        const duplicates = selectedMods.filter(val => val === currentValue);
+        if (duplicates.length > 1) {
+            select.classList.add("invalid-selection");
+        } else {
+            select.classList.remove("invalid-selection");
+        }
+    });
+}
+
 AUGMENT_SELECTS.forEach(selectId => {
     const select = document.getElementById(selectId);
     const currentValue = select.value;
@@ -452,6 +485,12 @@ AUGMENT_SELECTS.forEach(selectId => {
         applyAttachmentRestrictions('primary-optic-select', primaryWeaponName, 'Optic');
         applyAttachmentRestrictions('primary-ammo-select', primaryWeaponName, 'Ammo');
         PRIMARY_MOD_SELECTS.forEach(id => applyAttachmentRestrictions(id, primaryWeaponName, 'Mod'));
+        // Secondary mods
+applyModRestrictions(SECONDARY_MOD_SELECTS);
+
+// Primary mods
+applyModRestrictions(PRIMARY_MOD_SELECTS);
+
 
         // The original script's custom ammo filtering logic (for Warrant, etc.) should be here.
         // I will assume that the original ammo filtering logic (using DEFAULT_GENERAL_AMMO_IDS, etc.)
