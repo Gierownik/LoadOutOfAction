@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
              if (!currentValue) return;
 
              // Always enforce weapon uniqueness
-             const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id !== currentValue);
+             const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id && id !== currentValue);
              const isDuplicate = otherSelectedWeapons.includes(currentValue);
 
              // Disable duplicate option in the current select
@@ -433,7 +433,8 @@ AUGMENT_SELECTS.forEach(selectId => {
         // --- Already selected in another slot? ---
         const otherAugments = AUGMENT_SELECTS
             .filter(id => id !== selectId)
-            .map(id => document.getElementById(id)?.value);
+            .map(id => document.getElementById(id)?.value)
+            .filter(val => val);
 
         const alreadySelected = otherAugments.includes(augmentId);
 
@@ -460,7 +461,8 @@ AUGMENT_SELECTS.forEach(selectId => {
 
             const otherDeviceValues = DEVICE_SELECTS
                 .filter(id => id !== selectId)
-                .map(id => document.getElementById(id)?.value);
+                .map(id => document.getElementById(id)?.value)
+                .filter(val => val);
 
             Array.from(select.options).forEach(option => {
                 const deviceName = option.textContent;
