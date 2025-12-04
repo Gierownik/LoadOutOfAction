@@ -44,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 "20":"heavy", // Hole-Punch
 "21":"secondary", // Double-Tap
 "22":"backup", // Dusters
-"23":"backup", // Fists
-"23":"heavy" // Fists
+"23":"backup" // Fists
 
     };
 
@@ -172,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCompatible = attachment.compatibility.includes(weaponName);
             
             let shouldShow = true;
-            let restrictionReason = '';
 
             // 1. Technician Augment Check
             if (isTechnicianRequired && !loadoutState.isTechnician) {
@@ -341,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
              const currentValue = currentSelect?.value;
              if (!currentValue) return;
 
-             // Always enforce weapon uniqueness (Versatile does NOT allow duplicate weapons)
+             // Always enforce weapon uniqueness
              const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id !== currentValue);
              const isDuplicate = otherSelectedWeapons.includes(currentValue);
 
@@ -363,33 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  currentSelect.classList.remove('invalid-selection');
              }
         });
-
-        DEVICE_SELECTS.forEach(currentSelectId => {
-            const currentSelect = document.getElementById(currentSelectId);
-            const currentValue = currentSelect?.value;
-            if (!currentValue) return;
-
-            // Devices can be duplicated only if Versatile is active
-            const otherSelectedDevices = loadoutState.devices.filter(id => id !== currentValue);
-            const isDuplicate = otherSelectedDevices.includes(currentValue);
-            
-            Array.from(currentSelect.options).forEach(option => {
-                if (option.value && option.value !== currentValue) {
-                    const otherDevices = loadoutState.devices.filter(id => id !== option.value);
-                    const shouldDisable = otherDevices.includes(option.value) && !loadoutState.isVersatile;
-                    option.disabled = shouldDisable;
-                    option.title = shouldDisable ? 'Cannot equip multiple of the same device without the Versatile augment.' : '';
-                }
-            });
-            
-            if (isDuplicate && !loadoutState.isVersatile) {
-                currentSelect.classList.add('invalid-selection');
-            } else {
-                currentSelect.classList.remove('invalid-selection');
-            }
-        });
-
-        // 4. Device Augment Requirements (Neurohacker and Experimental)
+        // 2. Device Augment Requirements (Neurohacker and Experimental)
         DEVICE_SELECTS.forEach(selectId => {
             const select = document.getElementById(selectId);
             const currentValue = select.value;
@@ -410,6 +382,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     shouldDisable = true;
                     restrictionReason = 'Requires the Experimental Augment.';
                 }
+                if (loadoutState.devices[0] == loadoutState.devices[1]) {
+                    shouldDisable = true;
+                    restrictionReason = 'Already Equipped';
+                } 
 
                 // Apply restriction (except to the current selection, which is instead marked invalid below)
                 if (option.value !== currentValue) {
