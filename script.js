@@ -407,48 +407,57 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentValue = select.value;
         select.innerHTML = '<option value="">--- Select Attachment ---</option>';
 
-        // Only show attachments of the correct type
         const relevantAttachments = allAttachmentsData.filter(a => a.type === attachmentType);
-        
-        // If no weapon is selected, show no options
+
         if (!weaponName) return;
 
         relevantAttachments.forEach(attachment => {
-            const isTechnicianRequired = attachment.technician === "true";
-            // Check compatibility using the weapon's *name* (e.g., "Major")
-            const isCompatible = attachment.compatibility.includes(weaponName);
-            
-            let shouldShow = true;
+            const option = document.createElement('option');
+            option.value = attachment.name;
+            option.textContent = attachment.name;
 
-            // 1. Technician Augment Check
-            if (isTechnicianRequired && !loadoutState.isTechnician) {
-                shouldShow = false;
+            const requiresTechnician = attachment.technician === "true";
+            const isCompatible = attachment.compatibility.includes(weaponName);
+
+            let shouldDisable = false;
+            let restrictionReason = '';
+
+            // ---- 1. Technician requirement (same style as Experimental) ----
+            if (requiresTechnician && !loadoutState.isTechnician) {
+                shouldDisable = true;
                 restrictionReason = 'Requires the Technician Augment.';
             }
-            
-            // 2. Weapon Compatibility Check (read from attachments.json)
+
+            // ---- 2. Weapon compatibility ----
             if (!isCompatible) {
-                shouldShow = false;
+                shouldDisable = true;
                 restrictionReason = 'Not compatible with ' + weaponName + '.';
             }
 
-            if (shouldShow) {
-                // Assuming attachment name is unique and can be used as the value.
-                const option = document.createElement('option');
-                option.value = attachment.name;
-                option.textContent = attachment.name;
-                if (attachment.name === currentValue) {
-                    option.selected = true;
+            // ---- Apply disable + tooltip like the device code ----
+            option.disabled = shouldDisable;
+            option.title = shouldDisable ? restrictionReason : '';
+
+            // keep selected if still valid
+            if (attachment.name === currentValue) {
+                option.selected = true;
+
+                if (shouldDisable) {
+                    select.classList.add('invalid-selection');
+                } else {
+                    select.classList.remove('invalid-selection');
                 }
-                select.appendChild(option);
             }
+
+            select.appendChild(option);
         });
 
-        // Clear invalid selection after filtering
+        // If previous selection is now invalid → clear it
         if (currentValue && !select.querySelector(`option[value="${currentValue}"]`)) {
-             select.value = "";
+            select.value = "";
         }
     }
+
 
     // --- DATA LOADING & POPULATION ---
 
