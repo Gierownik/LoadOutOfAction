@@ -887,15 +887,14 @@ AUGMENT_SELECTS.forEach(selectId => {
         applyAttachmentRestrictions('primary-ammo-select', primaryWeaponName, 'Ammo');
         PRIMARY_MOD_SELECTS.forEach(id => applyAttachmentRestrictions(id, primaryWeaponName, 'Mod'));
         // Secondary mods
-applyModRestrictions(SECONDARY_MOD_SELECTS);
+        applyModRestrictions(SECONDARY_MOD_SELECTS);
 
-// Primary mods
-applyModRestrictions(PRIMARY_MOD_SELECTS);
+        // Primary mods
+        applyModRestrictions(PRIMARY_MOD_SELECTS);
 
         // Technician-only ammo: grey out options unless Technician augment equipped
         function updateTechnicianAmmoAvailability() {
             const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
-            console.log('updateTechnicianAmmoAvailability called. reverseIdMaps:', reverseIdMaps, 'TECHNICIAN_ONLY_AMMO_IDS:', TECHNICIAN_ONLY_AMMO_IDS);
             ammoSelectIds.forEach(selId => {
                 const sel = document.getElementById(selId);
                 if (!sel) return;
@@ -915,7 +914,6 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
                         // See if any technician-only ammo ID maps to this option's text
                         for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
                             if (reverseIdMaps['Ammo'][ammoid] === optionName) {
-                                console.log(`Matched technician-only ammo: ${optionName} (id ${ammoid})`);
                                 isTechnicianOnly = true;
                                 break;
                             }
