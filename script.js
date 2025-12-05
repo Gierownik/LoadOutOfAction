@@ -991,7 +991,13 @@ AUGMENT_SELECTS.forEach(selectId => {
             });
         }
 
-        updateTechnicianAmmoAvailability();
+        // Run availability check now and again after a short delay to avoid timing/race issues
+        try {
+            updateTechnicianAmmoAvailability();
+            setTimeout(() => {
+                try { updateTechnicianAmmoAvailability(); } catch (e) { console.warn('Delayed updateTechnicianAmmoAvailability failed', e); }
+            }, 100);
+        } catch (e) { console.warn('updateTechnicianAmmoAvailability invocation failed', e); }
 
 
     }
