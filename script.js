@@ -75,7 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isVersatile: false,
         isHeavyWeapons: false,
         isExperimental: false,
-        isNeurohacker: false
+        isNeurohacker: false,
+        isProfessional: false,
+        isStudied: false
     };
     
     // --- UTILITY FUNCTIONS ---
@@ -314,6 +316,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Run once on startup to ensure initial state and restrictions are applied
         updateLoadoutState();
         applyLoadoutRestrictions();
+
+        // After initial population, ensure the Loadout Code (added below) reflects current state
+        if (typeof updateLoadoutCode === 'function') {
+            updateLoadoutCode();
+        }
     }
 
     // --- LOGIC & RESTRICTIONS ---
@@ -376,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
              Array.from(currentSelect.options).forEach(option => {
                  if (option.value && option.value !== currentValue) {
                      // Check against ALL other selected weapons in the other slots
-                     const otherWeapons = loadoutState.weapons.all.filter(id => id !== option.value);
+                     const otherWeapons = loadoutState.weapons.all.filter(id => id !== option.value && id);
                      const shouldDisable = otherWeapons.includes(option.value);
                      option.disabled = shouldDisable;
                      option.title = shouldDisable ? 'Cannot equip multiple of the same weapon.' : '';
@@ -554,4 +561,164 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
     
     // --- INITIALIZATION ---
     fetchAndPopulateData();
+
+
+    // =======================
+    // === LOADOUT CODE SYSTEM (appended, non-invasive)
+    // =======================
+
+    // Create and insert the Loadout Code field dynamically (middle of container)
+    (function insertLoadoutCodeField() {
+        const container = document.querySelector('.container') || document.body;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'loadout-code-container';
+        wrapper.style.textAlign = 'center';
+        wrapper.style.margin = '20px 0';
+
+        const label = document.createElement('label');
+        label.setAttribute('for', 'loadout-code');
+        label.textContent = 'Loadout Code:';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'loadout-code';
+        input.style.width = '60%';
+        input.style.padding = '8px';
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(document.createTextNode(' '));
+        wrapper.appendChild(input);
+
+        // Try to insert roughly in the middle if container has children
+        const children = container.children;
+        const insertIndex = Math.floor(children.length / 2);
+        if (children.length > 0 && children[insertIndex]) {
+            container.insertBefore(wrapper, children[insertIndex]);
+        } else {
+            container.appendChild(wrapper);
+        }
+    })();
+
+    // Build fixed-length decimal string from current selections
+    function generateLoadoutDecimal() {
+        const shell = document.getElementById('shell-select')?.value || "0";
+        const backup = (document.getElementById('backup-weapon-select')?.value || "0").padStart(2,"0");
+        const secondary = (document.getElementById('secondary-weapon-select')?.value || "0").padStart(2,"0");
+        const primary = (document.getElementById('primary-weapon-select')?.value || "0").padStart(2,"0");
+
+        const sidearmAttachments = [
+            document.getElementById('secondary-optic-select')?.value || "0",
+            document.getElementById('secondary-ammo-select')?.value || "0",
+            ...SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value || "0")
+        ].map(v => v.padStart(2,"0")).join("");
+
+        const primaryAttachments = [
+            document.getElementById('primary-optic-select')?.value || "0",
+            document.getElementById('primary-ammo-select')?.value || "0",
+            ...PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value || "0")
+        ].map(v => v.padStart(2,"0")).join("");
+
+        const augments = AUGMENT_SELECTS
+            .map(id => document.getElementById(id)?.value || "0")
+            .map(v => v.padStart(3,"0"))
+            .join("");
+
+        const devices = DEVICE_SELECTS
+            .map(id => document.getElementById(id)?.value || "0")
+            .map(v => v.padStart(2,"0"))
+            .join("");
+
+        return shell + backup + secondary + primary + sidearmAttachments + primaryAttachments + augments + devices;
+    }
+
+    // Encode to Base64
+    function decimalToBase64(decimalString) {
+        return btoa(decimalString);
+    }
+
+    // Decode from Base64
+    function base64ToDecimal(base64String) {
+        try {
+            return atob(base64String);
+        } catch (e) {
+            alert("Invalid Loadout Code");
+            return null;
+        }
+    }
+
+    // Update the Loadout Code input value (called after any change)
+    function updateLoadoutCode() {
+        const field = document.getElementById('loadout-code');
+        if (!field) return;
+        const decimalString = generateLoadoutDecimal();
+        const base64Code = decimalToBase64(decimalString);
+        field.value = base64Code;
+    }
+
+    // Populate UI from a pasted Loadout Code
+    function populateFromCode(base64String) {
+        const decimalString = base64ToDecimal(base64String.trim());
+        if (!decimalString) return;
+
+        let index = 0;
+        const shell = decimalString.slice(index, index+1); index += 1;
+        const backup = decimalString.slice(index, index+2); index += 2;
+        const secondary = decimalString.slice(index, index+2); index += 2;
+        const primary = decimalString.slice(index, index+2); index += 2;
+
+        const sidearmAttachments = [];
+        for (let i=0; i<6; i++) { sidearmAttachments.push(decimalString.slice(index, index+2)); index += 2; }
+
+        const primaryAttachments = [];
+        for (let i=0; i<6; i++) { primaryAttachments.push(decimalString.slice(index, index+2)); index += 2; }
+
+        const augments = [];
+        for (let i=0; i<4; i++) { augments.push(decimalString.slice(index, index+3)); index += 3; }
+
+        const devices = [];
+        for (let i=0; i<2; i++) { devices.push(decimalString.slice(index, index+2)); index += 2; }
+
+        // Assign values
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+        setVal('shell-select', shell);
+        setVal('backup-weapon-select', backup);
+        setVal('secondary-weapon-select', secondary);
+        setVal('primary-weapon-select', primary);
+
+        setVal('secondary-optic-select', sidearmAttachments[0]);
+        setVal('secondary-ammo-select', sidearmAttachments[1]);
+        SECONDARY_MOD_SELECTS.forEach((id, i) => setVal(id, sidearmAttachments[i+2]));
+
+        setVal('primary-optic-select', primaryAttachments[0]);
+        setVal('primary-ammo-select', primaryAttachments[1]);
+        PRIMARY_MOD_SELECTS.forEach((id, i) => setVal(id, primaryAttachments[i+2]));
+
+        AUGMENT_SELECTS.forEach((id, i) => setVal(id, augments[i]));
+        DEVICE_SELECTS.forEach((id, i) => setVal(id, devices[i]));
+
+        // Re-apply your existing logic
+        applyLoadoutRestrictions();
+        updateLoadoutCode();
+    }
+
+    // Wire up the Loadout Code input
+    (function wireLoadoutCodeInput() {
+        const field = document.getElementById('loadout-code');
+        if (!field) return;
+
+        // When user pastes/changes code, populate the UI
+        field.addEventListener('change', (e) => {
+            populateFromCode(e.target.value);
+        });
+    })();
+
+    // Non-invasive: also update the code whenever any select changes (without touching your existing listeners)
+    (function mirrorChangesToCode() {
+        const container = document.querySelector('.container') || document.body;
+        container.addEventListener('change', () => {
+            updateLoadoutCode();
+        });
+    })();
+
 });
