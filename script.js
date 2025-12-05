@@ -876,24 +876,13 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
      * Each field has a chance to be empty.
      */
     function randomizeLoadout() {
-        // Helper to randomly choose an empty slot or a valid option
-        function getRandomOption(selectId, allowEmpty = true) {
+        // Helper to get valid options from a select
+        function getValidOptionsFromSelect(selectId) {
             const select = document.getElementById(selectId);
-            if (!select) return null;
-
-            const emptyChance = allowEmpty ? 0.2 : 0; // 20% chance to leave empty if allowed
-            if (Math.random() < emptyChance) {
-                return ''; // Empty slot
-            }
-
-            // Get all non-empty options
-            const validOptions = Array.from(select.options)
-                .filter(opt => opt.value); // Skip placeholder option
-
-            if (validOptions.length === 0) return '';
-            
-            // Pick random valid option
-            return validOptions[Math.floor(Math.random() * validOptions.length)].value;
+            if (!select) return [];
+            return Array.from(select.options)
+                .filter(opt => opt.value && !opt.disabled)
+                .map(opt => opt.value);
         }
 
         // 1. Randomize Augments (no duplicates, high chance of empty)
@@ -914,30 +903,55 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
             });
         }
 
-        // Update state so we know what augments are active
+        // Update state and apply restrictions so weapons list is filtered by augments
         updateLoadoutState();
+        applyLoadoutRestrictions();
 
         // 2. Randomize Shells
-        document.getElementById('shell-select').value = getRandomOption('shell-select', true) || '';
-
-        // 3. Randomize Weapons (no duplicates, high chance of empty)
-        const weaponOptions = document.getElementById('backup-weapon-select');
-        if (weaponOptions) {
-            const validWeapons = Array.from(weaponOptions.options)
-                .filter(opt => opt.value)
-                .map(opt => opt.value);
-
-            // Pick 0-3 unique weapons for the three slots
-            const numWeapons = Math.floor(Math.random() * 4); // 0 to 3
-            const shuffled = [...validWeapons].sort(() => Math.random() - 0.5);
-            const selectedWeapons = shuffled.slice(0, numWeapons);
-
-            const weaponSlots = ['backup-weapon-select', 'secondary-weapon-select', 'primary-weapon-select'];
-            weaponSlots.forEach((selectId, idx) => {
-                const select = document.getElementById(selectId);
-                select.value = selectedWeapons[idx] || '';
-            });
+        const shellSelect = document.getElementById('shell-select');
+        const shellOptions = getValidOptionsFromSelect('shell-select');
+        if (shellOptions.length > 0 && Math.random() > 0.2) {
+            shellSelect.value = shellOptions[Math.floor(Math.random() * shellOptions.length)];
+        } else {
+            shellSelect.value = '';
         }
+
+        // 3. Randomize Weapons (no duplicates, high chance of empty) - NOW uses filtered options
+        const backupOptions = getValidOptionsFromSelect('backup-weapon-select');
+        const secondaryOptions = getValidOptionsFromSelect('secondary-weapon-select');
+        const primaryOptions = getValidOptionsFromSelect('primary-weapon-select');
+
+        // Pick a random selection of unique weapons
+        const allValidWeapons = new Set([...backupOptions, ...secondaryOptions, ...primaryOptions]);
+        const weaponArray = Array.from(allValidWeapons);
+        const numWeapons = Math.floor(Math.random() * 4); // 0 to 3
+        const shuffledWeapons = weaponArray.sort(() => Math.random() - 0.5);
+        const selectedWeapons = shuffledWeapons.slice(0, numWeapons);
+
+        // Assign weapons to slots, ensuring they don't exceed slot restrictions
+        const assignedWeapons = { backup: '', secondary: '', primary: '' };
+        let weaponIdx = 0;
+
+        // Try to assign backup slot
+        if (weaponIdx < selectedWeapons.length && backupOptions.includes(selectedWeapons[weaponIdx])) {
+            assignedWeapons.backup = selectedWeapons[weaponIdx];
+            weaponIdx++;
+        }
+
+        // Try to assign secondary slot
+        if (weaponIdx < selectedWeapons.length && secondaryOptions.includes(selectedWeapons[weaponIdx])) {
+            assignedWeapons.secondary = selectedWeapons[weaponIdx];
+            weaponIdx++;
+        }
+
+        // Try to assign primary slot
+        if (weaponIdx < selectedWeapons.length && primaryOptions.includes(selectedWeapons[weaponIdx])) {
+            assignedWeapons.primary = selectedWeapons[weaponIdx];
+        }
+
+        document.getElementById('backup-weapon-select').value = assignedWeapons.backup;
+        document.getElementById('secondary-weapon-select').value = assignedWeapons.secondary;
+        document.getElementById('primary-weapon-select').value = assignedWeapons.primary;
 
         // Update state to know what weapons are selected
         updateLoadoutState();
@@ -982,28 +996,34 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
             });
         }
 
-        // Update state to know what devices are selected
+        // Update state and apply restrictions before randomizing attachments
         updateLoadoutState();
+        applyLoadoutRestrictions();
 
         // 5. Randomize Secondary Weapon Attachments
         const secondaryWeaponId = document.getElementById('secondary-weapon-select').value;
         if (secondaryWeaponId) {
-            const secondaryWeaponName = allWeaponsData[secondaryWeaponId];
+            const secondaryOpticOptions = getValidOptionsFromSelect('secondary-optic-select');
+            const secondaryAmmoOptions = getValidOptionsFromSelect('secondary-ammo-select');
             
-            // Randomize optic and ammo
-            document.getElementById('secondary-optic-select').value = getRandomOption('secondary-optic-select', true) || '';
-            document.getElementById('secondary-ammo-select').value = getRandomOption('secondary-ammo-select', true) || '';
+            // Randomize optic and ammo with 20% empty chance
+            if (secondaryOpticOptions.length > 0 && Math.random() > 0.2) {
+                document.getElementById('secondary-optic-select').value = secondaryOpticOptions[Math.floor(Math.random() * secondaryOpticOptions.length)];
+            } else {
+                document.getElementById('secondary-optic-select').value = '';
+            }
+            
+            if (secondaryAmmoOptions.length > 0 && Math.random() > 0.2) {
+                document.getElementById('secondary-ammo-select').value = secondaryAmmoOptions[Math.floor(Math.random() * secondaryAmmoOptions.length)];
+            } else {
+                document.getElementById('secondary-ammo-select').value = '';
+            }
 
             // Randomize mods (no duplicates)
-            const modOptions = document.getElementById('secondary-mod-1-select');
-            if (modOptions) {
-                const validMods = Array.from(modOptions.options)
-                    .filter(opt => opt.value)
-                    .map(opt => opt.value);
-
-                // Pick 0-4 unique mods
+            const secondaryModOptions = getValidOptionsFromSelect('secondary-mod-1-select');
+            if (secondaryModOptions.length > 0) {
                 const numMods = Math.floor(Math.random() * 5); // 0 to 4
-                const shuffled = [...validMods].sort(() => Math.random() - 0.5);
+                const shuffled = [...secondaryModOptions].sort(() => Math.random() - 0.5);
                 const selectedMods = shuffled.slice(0, numMods);
 
                 SECONDARY_MOD_SELECTS.forEach((selectId, idx) => {
@@ -1021,22 +1041,27 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
         // 6. Randomize Primary Weapon Attachments
         const primaryWeaponId = document.getElementById('primary-weapon-select').value;
         if (primaryWeaponId) {
-            const primaryWeaponName = allWeaponsData[primaryWeaponId];
+            const primaryOpticOptions = getValidOptionsFromSelect('primary-optic-select');
+            const primaryAmmoOptions = getValidOptionsFromSelect('primary-ammo-select');
             
-            // Randomize optic and ammo
-            document.getElementById('primary-optic-select').value = getRandomOption('primary-optic-select', true) || '';
-            document.getElementById('primary-ammo-select').value = getRandomOption('primary-ammo-select', true) || '';
+            // Randomize optic and ammo with 20% empty chance
+            if (primaryOpticOptions.length > 0 && Math.random() > 0.2) {
+                document.getElementById('primary-optic-select').value = primaryOpticOptions[Math.floor(Math.random() * primaryOpticOptions.length)];
+            } else {
+                document.getElementById('primary-optic-select').value = '';
+            }
+            
+            if (primaryAmmoOptions.length > 0 && Math.random() > 0.2) {
+                document.getElementById('primary-ammo-select').value = primaryAmmoOptions[Math.floor(Math.random() * primaryAmmoOptions.length)];
+            } else {
+                document.getElementById('primary-ammo-select').value = '';
+            }
 
             // Randomize mods (no duplicates)
-            const modOptions = document.getElementById('primary-mod-1-select');
-            if (modOptions) {
-                const validMods = Array.from(modOptions.options)
-                    .filter(opt => opt.value)
-                    .map(opt => opt.value);
-
-                // Pick 0-4 unique mods
+            const primaryModOptions = getValidOptionsFromSelect('primary-mod-1-select');
+            if (primaryModOptions.length > 0) {
                 const numMods = Math.floor(Math.random() * 5); // 0 to 4
-                const shuffled = [...validMods].sort(() => Math.random() - 0.5);
+                const shuffled = [...primaryModOptions].sort(() => Math.random() - 0.5);
                 const selectedMods = shuffled.slice(0, numMods);
 
                 PRIMARY_MOD_SELECTS.forEach((selectId, idx) => {
@@ -1054,6 +1079,13 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
         // Final update to enforce all restrictions and update code
         updateLoadoutState();
         applyLoadoutRestrictions();
+
+        // Refresh the loadout code output
+        const codeOut = document.getElementById('loadout-code-output');
+        if (codeOut) {
+            const code = generateLoadoutCode();
+            codeOut.value = code || '';
+        }
     }
     
     /**
