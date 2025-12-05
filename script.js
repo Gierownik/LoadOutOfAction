@@ -929,6 +929,10 @@ AUGMENT_SELECTS.forEach(selectId => {
                         }
                         opt.title = shouldDisable ? 'Requires the Technician augment.' : '';
                     }
+                    // debug each option evaluation
+                    try {
+                        console.debug('Ammo option check', { select: selId, optionValue: optionValue, optionName: optionName, isTechnicianOnly });
+                    } catch (e) {}
                 });
             });
         }
