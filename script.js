@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Technician-only ammo IDs (populated after loading attachments/id.json)
     let TECHNICIAN_ONLY_AMMO_IDS = [];
 
+    // Loop handle for continuous technician ammo availability check
+    let technicianAmmoCheckInterval = null;
+
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
     const WEAPON_CATEGORIES = {
@@ -991,12 +994,9 @@ AUGMENT_SELECTS.forEach(selectId => {
             });
         }
 
-        // Run availability check now and again after a short delay to avoid timing/race issues
+        // Run availability check now
         try {
             updateTechnicianAmmoAvailability();
-            setTimeout(() => {
-                try { updateTechnicianAmmoAvailability(); } catch (e) { console.warn('Delayed updateTechnicianAmmoAvailability failed', e); }
-            }, 100);
         } catch (e) { console.warn('updateTechnicianAmmoAvailability invocation failed', e); }
 
 
@@ -1014,4 +1014,12 @@ AUGMENT_SELECTS.forEach(selectId => {
     
     // --- INITIALIZATION ---
     fetchAndPopulateData();
+
+    // Start continuous technician ammo availability check loop
+    if (technicianAmmoCheckInterval) clearInterval(technicianAmmoCheckInterval);
+    technicianAmmoCheckInterval = setInterval(() => {
+        try {
+            updateTechnicianAmmoAvailability();
+        } catch (e) { console.warn('Loop: updateTechnicianAmmoAvailability failed', e); }
+    }, 100);
 });
