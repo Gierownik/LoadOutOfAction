@@ -101,6 +101,10 @@ select option {
     color: rgba(143, 255, 237, 0.85) !important; /* Makes the text gray */
     background-color: hsl(170, 25%, 20%); /* Light background to visually distinguish it */
 }
+select option:first-child {
+    color: rgba(143, 255, 237, 0.85);
+    opacity: 0.3;
+}
 
 .separator {
     border: 0;
