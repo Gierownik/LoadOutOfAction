@@ -23,11 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAttachmentsData = [];// Stores array of attachment objects (from attachments.json)
     let idDataGlobal = {};      // Raw id.json data for id -> name and name -> id lookups
     let reverseIdMaps = {};     // Reverse maps: category -> { id: name }
-    // Technician-only ammo IDs (populated after loading attachments/id.json)
-    let TECHNICIAN_ONLY_AMMO_IDS = [];
-
-    // Loop handle for continuous technician ammo availability check
-    let technicianAmmoCheckInterval = null;
 
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
@@ -373,40 +368,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!select) return;
             const category = SELECT_TO_CATEGORY[selectId];
             const name = (category && reverseIdMaps[category]) ? reverseIdMaps[category][idValue] : null;
-
-            // Try several matching strategies in order to be resilient to whether options use ids or names:
-            // 1) option.value === idValue
-            // 2) option.value === name (id->name mapping from id.json)
-            // 3) option.textContent === name
-            // 4) case-insensitive matches on textContent
-            if (idValue) {
-                // 1
-                const byValue = Array.from(select.options).find(o => o.value === idValue);
-                if (byValue) { select.value = idValue; return; }
+            if (name && select.querySelector(`option[value="${name}"]`)) {
+                select.value = name;
+            } else {
+                // If idValue matches an option value directly, set it
+                if (idValue && select.querySelector(`option[value="${idValue}"]`)) select.value = idValue;
             }
-            if (name) {
-                // 2
-                const byNameValue = Array.from(select.options).find(o => o.value === name);
-                if (byNameValue) { select.value = name; return; }
-
-                // 3
-                const byText = Array.from(select.options).find(o => (o.textContent || '') === name);
-                if (byText) { select.value = byText.value; return; }
-
-                // 4 - case-insensitive partial match
-                const lower = name.toLowerCase();
-                const byTextCI = Array.from(select.options).find(o => (o.textContent || '').toLowerCase() === lower || (o.textContent || '').toLowerCase().includes(lower));
-                if (byTextCI) { select.value = byTextCI.value; return; }
-            }
-
-            // Fallback: if any option's text contains the numeric idValue, pick it
-            if (idValue) {
-                const byTextContainsId = Array.from(select.options).find(o => (o.textContent || '').includes(idValue));
-                if (byTextContainsId) { select.value = byTextContainsId.value; return; }
-            }
-
-            // final fallback: clear
-            select.value = '';
         };
 
         setAttachmentById('secondary-optic-select', decoded['secondary-optic-select']);
@@ -466,40 +433,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (shouldShow) {
-                // Create option. Prefer using the numeric id (from id.json) as the option value
+                // Assuming attachment name is unique and can be used as the value.
                 const option = document.createElement('option');
-                // Determine category name as used in idDataGlobal (Optic->Optics, Ammo->Ammo, Mod->Mods)
-                let category = attachmentType;
-                if (attachmentType === 'Optic') category = 'Optics';
-                else if (attachmentType === 'Mod') category = 'Mods';
-
-                // Try to find a numeric id for this attachment name
-                let resolvedId = null;
-                try {
-                    if (idDataGlobal && idDataGlobal[category]) {
-                        // Direct lookup by exact name
-                        if (idDataGlobal[category][attachment.name]) resolvedId = String(idDataGlobal[category][attachment.name]);
-                        else {
-                            // Case-insensitive match fallback
-                            const found = Object.entries(idDataGlobal[category]).find(([n, i]) => n.toLowerCase() === (attachment.name || '').toLowerCase());
-                            if (found) resolvedId = String(found[1]);
-                        }
-                    }
-                } catch (e) { /* ignore */ }
-
-                // Set option value to the numeric id when available; otherwise fall back to the attachment name
-                option.value = resolvedId || attachment.name;
+                option.value = attachment.name;
                 option.textContent = attachment.name;
-                // Keep a data-name to preserve original name for matching/debug
-                option.dataset.name = attachment.name;
-                // Mark dataset.tech if this attachment requires Technician
-                if (isTechnicianRequired) option.dataset.tech = '1'; else delete option.dataset.tech;
-
-                // Preserve previous selection if names/ids match
-                if ((resolvedId && resolvedId === currentValue) || (!resolvedId && attachment.name === currentValue) || (attachment.name === currentValue)) {
+                if (attachment.name === currentValue) {
                     option.selected = true;
                 }
-
                 select.appendChild(option);
             }
         });
@@ -561,26 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const [id, name] of Object.entries(placeholderWeapons)) { allWeaponsData[id] = name; }
             }
 
-            // Build technician-only ammo list dynamically from attachments.json and id.json (Ammo mapping)
-            try {
-                TECHNICIAN_ONLY_AMMO_IDS = [];
-                if (Array.isArray(allAttachmentsData) && idData && idData.Ammo) {
-                    for (const att of allAttachmentsData) {
-                        if (!att || att.type !== 'Ammo') continue;
-                        if (att.technician !== "true") continue;
-                        const name = att.name;
-                        let id = idData.Ammo[name];
-                        if (!id) {
-                            const found = Object.entries(idData.Ammo).find(([n, i]) => n.toLowerCase() === String(name).toLowerCase());
-                            if (found) id = found[1];
-                        }
-                        if (id) TECHNICIAN_ONLY_AMMO_IDS.push(String(id));
-                    }
-                    TECHNICIAN_ONLY_AMMO_IDS = Array.from(new Set(TECHNICIAN_ONLY_AMMO_IDS));
-                }
-                console.log('Technician-only ammo ids (computed):', TECHNICIAN_ONLY_AMMO_IDS);
-            } catch (e) { console.warn('Error building TECHNICIAN_ONLY_AMMO_IDS', e); }
-
             // Return combined data for initial population
             return { ...idData, Devices: allDevicesData };
 
@@ -620,39 +540,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate attachments (temporarily populate with all, filtering will happen in applyLoadoutRestrictions)
         populateSelect('secondary-optic-select', data.Optics);
         populateSelect('secondary-ammo-select', data.Ammo);
-        // Tag ammo options with a data attribute if they are technician-only
-        markTechnicianAmmoOptions();
         SECONDARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
 
         populateSelect('primary-optic-select', data.Optics);
         populateSelect('primary-ammo-select', data.Ammo);
-        // Tag ammo options again for primary
-        markTechnicianAmmoOptions();
         PRIMARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
-        
-        // Helper: mark ammo options with dataset.tech='1' when they match computed technician-only IDs
-        function markTechnicianAmmoOptions() {
-            try {
-                const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
-                ammoSelectIds.forEach(selId => {
-                    const sel = document.getElementById(selId);
-                    if (!sel) return;
-                    Array.from(sel.options).forEach(opt => {
-                        if (!opt.value) return;
-                        const val = String(opt.value).trim();
-                        const name = (opt.textContent || '').trim();
-                        let mark = false;
-                        if (TECHNICIAN_ONLY_AMMO_IDS.includes(val)) mark = true;
-                        else if (reverseIdMaps['Ammo']) {
-                            for (const id of TECHNICIAN_ONLY_AMMO_IDS) {
-                                if (reverseIdMaps['Ammo'][id] === name) { mark = true; break; }
-                            }
-                        }
-                        if (mark) opt.dataset.tech = '1'; else delete opt.dataset.tech;
-                    });
-                });
-            } catch (e) { console.warn('markTechnicianAmmoOptions failed', e); }
-        }
         
         // --- Add Event Listeners ---
         const allSelects = document.querySelectorAll('.container select');
@@ -729,14 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Run once on startup to ensure initial state and restrictions are applied
         updateLoadoutState();
         applyLoadoutRestrictions();
-
-        // Start continuous technician ammo availability check loop after function is defined
-        if (technicianAmmoCheckInterval) clearInterval(technicianAmmoCheckInterval);
-        technicianAmmoCheckInterval = setInterval(() => {
-            try {
-                updateTechnicianAmmoAvailability();
-            } catch (e) { console.warn('Loop: updateTechnicianAmmoAvailability failed', e); }
-        }, 100);
     }
 
     // --- LOGIC & RESTRICTIONS ---
@@ -771,48 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadoutState.isProfessional = loadoutState.augments.includes(AUGMENT_PROFESSIONAL);
         loadoutState.isStudied = loadoutState.augments.includes(AUGMENT_STUDIED);
 
-    }
-    
-    /**
-     * Updates technician-only ammo availability (grey/disable options).
-     */
-    function updateTechnicianAmmoAvailability() {
-        const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
-        ammoSelectIds.forEach(selId => {
-            const sel = document.getElementById(selId);
-            if (!sel) return;
-            Array.from(sel.options).forEach(opt => {
-                if (!opt.value) return; // skip placeholder
-                
-                let isTechnicianOnly = false;
-                const optionName = (opt.textContent || '').trim();
-                const optionValue = (opt.value || '').trim();
-                
-                // Prefer explicit data tag set during population; fallback to id/name checks
-                if (opt.dataset && opt.dataset.tech === '1') {
-                    isTechnicianOnly = true;
-                } else if (TECHNICIAN_ONLY_AMMO_IDS.includes(optionValue)) {
-                    isTechnicianOnly = true;
-                } else if (reverseIdMaps['Ammo']) {
-                    for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
-                        if (reverseIdMaps['Ammo'][ammoid] === optionName) {
-                            isTechnicianOnly = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (isTechnicianOnly) {
-                    const shouldDisable = !loadoutState.isTechnician;
-                    // Don't disable the currently selected option to avoid flicker
-                    if (opt.value !== sel.value) {
-                        opt.disabled = shouldDisable;
-                        opt.classList.toggle('technician-only-restricted', shouldDisable);
-                    }
-                    opt.title = shouldDisable ? 'Requires the Technician augment.' : '';
-                }
-            });
-        });
     }
     
     /**
@@ -995,13 +837,11 @@ AUGMENT_SELECTS.forEach(selectId => {
         applyAttachmentRestrictions('primary-ammo-select', primaryWeaponName, 'Ammo');
         PRIMARY_MOD_SELECTS.forEach(id => applyAttachmentRestrictions(id, primaryWeaponName, 'Mod'));
         // Secondary mods
-        applyModRestrictions(SECONDARY_MOD_SELECTS);
+applyModRestrictions(SECONDARY_MOD_SELECTS);
 
-        // Primary mods
-        applyModRestrictions(PRIMARY_MOD_SELECTS);
+// Primary mods
+applyModRestrictions(PRIMARY_MOD_SELECTS);
 
-        // Technician-only ammo: grey out options unless Technician augment equipped
-        updateTechnicianAmmoAvailability();
 
     }
     
