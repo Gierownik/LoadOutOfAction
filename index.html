@@ -8,8 +8,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>Loadout Editor (WIP)</h1>
+        <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">Loadout Editor (WIP)</h1>
         
+        <!-- NEW LOADOUT CODE SECTION -->
+        <div id="loadout-code-container" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+            <input id="loadout-code-input" type="text" placeholder="Input Code" style="flex:1;min-width:240px;padding:6px;" />
+            <button id="loadout-code-apply-btn" style="padding:6px 10px;">Enter</button>
+            <input id="loadout-code-output" type="text" readonly placeholder="Generated code" style="flex:1;min-width:240px;padding:6px;" />
+        </div>
         <div class="grid-container">
             
             <div class="column left-column">

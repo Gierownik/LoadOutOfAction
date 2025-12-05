@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let allWeaponsData = {};    // Stores Weapon ID: Name map (from id.json)
     let allDevicesData = [];    // Stores array of device objects (from devices.json)
     let allAttachmentsData = [];// Stores array of attachment objects (from attachments.json)
+    let idDataGlobal = {};      // Raw id.json data for id -> name and name -> id lookups
+    let reverseIdMaps = {};     // Reverse maps: category -> { id: name }
 
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
@@ -168,6 +170,221 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Loadout Code Helpers (encode/decode to base64) ---
+    // Mapping from select IDs to id.json categories used for lookups
+    const SELECT_TO_CATEGORY = {
+        'shell-select': 'Shells',
+        'backup-weapon-select': 'Weapons',
+        'secondary-weapon-select': 'Weapons',
+        'primary-weapon-select': 'Weapons',
+        'secondary-optic-select': 'Optics',
+        'secondary-ammo-select': 'Ammo',
+        'primary-optic-select': 'Optics',
+        'primary-ammo-select': 'Ammo',
+        'primary-mod-1-select': 'Mods',
+        'primary-mod-2-select': 'Mods',
+        'primary-mod-3-select': 'Mods',
+        'primary-mod-4-select': 'Mods',
+        'secondary-mod-1-select': 'Mods',
+        'secondary-mod-2-select': 'Mods',
+        'secondary-mod-3-select': 'Mods',
+        'secondary-mod-4-select': 'Mods',
+        'augment-1-select': 'Augments',
+        'augment-2-select': 'Augments',
+        'augment-3-select': 'Augments',
+        'augment-4-select': 'Augments',
+        'device-1-select': 'Devices',
+        'device-2-select': 'Devices'
+    };
+
+    // Field order and widths (decimal digits) used when encoding/decoding
+    const ENCODE_FIELDS = [
+        { id: 'shell-select', width: 2 },
+        { id: 'backup-weapon-select', width: 3 },
+        { id: 'primary-weapon-select', width: 3 },
+        { id: 'secondary-weapon-select', width: 3 },
+
+        { id: 'secondary-optic-select', width: 3 },
+        { id: 'secondary-ammo-select', width: 3 },
+        { id: 'secondary-mod-1-select', width: 3 },
+        { id: 'secondary-mod-2-select', width: 3 },
+        { id: 'secondary-mod-3-select', width: 3 },
+        { id: 'secondary-mod-4-select', width: 3 },
+
+        { id: 'primary-optic-select', width: 3 },
+        { id: 'primary-ammo-select', width: 3 },
+        { id: 'primary-mod-1-select', width: 3 },
+        { id: 'primary-mod-2-select', width: 3 },
+        { id: 'primary-mod-3-select', width: 3 },
+        { id: 'primary-mod-4-select', width: 3 },
+
+        { id: 'augment-1-select', width: 3 },
+        { id: 'augment-2-select', width: 3 },
+        { id: 'augment-3-select', width: 3 },
+        { id: 'augment-4-select', width: 3 },
+
+        { id: 'device-1-select', width: 3 },
+        { id: 'device-2-select', width: 3 }
+    ];
+
+    function bigintToBase64(bigint) {
+        if (bigint === 0n) return '';
+        let b = bigint;
+        const bytes = [];
+        while (b > 0n) {
+            bytes.push(Number(b & 0xFFn));
+            b >>= 8n;
+        }
+        // bytes are little-endian; convert to big-endian string
+        let binary = '';
+        for (let i = bytes.length - 1; i >= 0; i--) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+    }
+
+    function base64ToBigInt(b64) {
+        if (!b64) return 0n;
+        const binary = atob(b64);
+        let result = 0n;
+        for (let i = 0; i < binary.length; i++) {
+            result = (result << 8n) + BigInt(binary.charCodeAt(i));
+        }
+        return result;
+    }
+
+    function generateLoadoutCode() {
+        // require idDataGlobal to be available
+        if (!idDataGlobal || Object.keys(idDataGlobal).length === 0) return '';
+
+        // Build numeric string by iterating ENCODE_FIELDS and reading select values
+        let numeric = '';
+        ENCODE_FIELDS.forEach(field => {
+            const select = document.getElementById(field.id);
+            let raw = '';
+            if (!select) raw = '';
+            else {
+                const val = select.value || '';
+                const category = SELECT_TO_CATEGORY[field.id];
+
+                // If the selected option is already an id (digits), use that.
+                if (/^\d+$/.test(val)) raw = val;
+                else if (category && idDataGlobal[category]) {
+                    // Try to find id by name in idDataGlobal (name -> id mapping)
+                    const mapping = idDataGlobal[category];
+                    // mapping might be an object name->id
+                    if (mapping[val]) raw = String(mapping[val]);
+                    else {
+                        // Maybe val equals a name but case differs: try to find key by value
+                        const found = Object.entries(mapping).find(([name, id]) => name === val || String(id) === val);
+                        raw = found ? String(found[1]) : '';
+                    }
+                } else {
+                    raw = '';
+                }
+            }
+            numeric += raw.padStart(field.width, '0');
+        });
+
+        // Convert numeric string to BigInt and then to base64
+        const big = numeric ? BigInt(numeric) : 0n;
+        const b64 = bigintToBase64(big);
+        return b64;
+    }
+
+    function applyLoadoutCodeToFields(b64) {
+        if (!b64) return;
+        if (!idDataGlobal || Object.keys(idDataGlobal).length === 0) return;
+
+        const big = base64ToBigInt(b64);
+        let numeric = big.toString();
+
+        // numeric may have lost leading zeros, so we need to left-pad to the total length
+        const totalWidth = ENCODE_FIELDS.reduce((s, f) => s + f.width, 0);
+        numeric = numeric.padStart(totalWidth, '0');
+
+        // Slice numeric according to fields
+        let idx = 0;
+        const decoded = {};
+        ENCODE_FIELDS.forEach(field => {
+            const part = numeric.slice(idx, idx + field.width);
+            idx += field.width;
+            const value = part.replace(/^0+/, '') || '';
+            decoded[field.id] = value;
+        });
+
+        // Set values for selects. First set non-attachment selects (weapons, shell, augments)
+        const setSelectValue = (selectId, idValue) => {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            // If there is an option with value == idValue -> set it
+            if (idValue && select.querySelector(`option[value="${idValue}"]`)) {
+                select.value = idValue;
+                return;
+            }
+            // Otherwise try to map id -> name using reverseIdMaps
+            const category = SELECT_TO_CATEGORY[selectId];
+            if (category && reverseIdMaps[category] && reverseIdMaps[category][idValue]) {
+                const name = reverseIdMaps[category][idValue];
+                if (select.querySelector(`option[value="${name}"]`)) {
+                    select.value = name;
+                    return;
+                }
+            }
+            // fallback: clear
+            select.value = '';
+        };
+
+        // Set weapons + shell + augments + devices (devices use names in this app)
+        setSelectValue('shell-select', decoded['shell-select']);
+        setSelectValue('backup-weapon-select', decoded['backup-weapon-select']);
+        setSelectValue('primary-weapon-select', decoded['primary-weapon-select']);
+        setSelectValue('secondary-weapon-select', decoded['secondary-weapon-select']);
+
+        setSelectValue('augment-1-select', decoded['augment-1-select']);
+        setSelectValue('augment-2-select', decoded['augment-2-select']);
+        setSelectValue('augment-3-select', decoded['augment-3-select']);
+        setSelectValue('augment-4-select', decoded['augment-4-select']);
+
+        // Devices may use keys that are names in the device options; reverseIdMaps['Devices'] maps id->name
+        setSelectValue('device-1-select', decoded['device-1-select']);
+        setSelectValue('device-2-select', decoded['device-2-select']);
+
+        // Now update state and restrictions so attachment selects are repopulated correctly
+        updateLoadoutState();
+        applyLoadoutRestrictions();
+
+        // Now set attachments (optic/ammo/mods) which typically have option values as names
+        const setAttachmentById = (selectId, idValue) => {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const category = SELECT_TO_CATEGORY[selectId];
+            const name = (category && reverseIdMaps[category]) ? reverseIdMaps[category][idValue] : null;
+            if (name && select.querySelector(`option[value="${name}"]`)) {
+                select.value = name;
+            } else {
+                // If idValue matches an option value directly, set it
+                if (idValue && select.querySelector(`option[value="${idValue}"]`)) select.value = idValue;
+            }
+        };
+
+        setAttachmentById('secondary-optic-select', decoded['secondary-optic-select']);
+        setAttachmentById('secondary-ammo-select', decoded['secondary-ammo-select']);
+        setAttachmentById('secondary-mod-1-select', decoded['secondary-mod-1-select']);
+        setAttachmentById('secondary-mod-2-select', decoded['secondary-mod-2-select']);
+        setAttachmentById('secondary-mod-3-select', decoded['secondary-mod-3-select']);
+        setAttachmentById('secondary-mod-4-select', decoded['secondary-mod-4-select']);
+
+        setAttachmentById('primary-optic-select', decoded['primary-optic-select']);
+        setAttachmentById('primary-ammo-select', decoded['primary-ammo-select']);
+        setAttachmentById('primary-mod-1-select', decoded['primary-mod-1-select']);
+        setAttachmentById('primary-mod-2-select', decoded['primary-mod-2-select']);
+        setAttachmentById('primary-mod-3-select', decoded['primary-mod-3-select']);
+        setAttachmentById('primary-mod-4-select', decoded['primary-mod-4-select']);
+
+        // Final apply to enforce restrictions and visual state
+        updateLoadoutState();
+        applyLoadoutRestrictions();
+    }
+
 
 
     /**
@@ -246,14 +463,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const attachmentsData = await attachmentsResponse.json();
 
             // Store global data
+            idDataGlobal = idData || {};
             allDevicesData = devicesData.map(d => ({ ...d, id: d.name })); // Use name as ID since no IDs are provided
             allAttachmentsData = attachmentsData;
-            
+
+            // Build reverseIdMaps: for each category in idDataGlobal, create id->name map
+            reverseIdMaps = {};
+            for (const [category, mapping] of Object.entries(idDataGlobal)) {
+                if (typeof mapping === 'object') {
+                    reverseIdMaps[category] = {};
+                    for (const [name, id] of Object.entries(mapping)) {
+                        reverseIdMaps[category][String(id)] = name;
+                    }
+                }
+            }
+
             // Create a map of Weapon ID: Name for easy lookup (assuming idData.Weapons exists)
             if (idData.Weapons) {
-                 for (const [name, id] of Object.entries(idData.Weapons)) {
-                     allWeaponsData[id] = name; // {ID: Name}
-                 }
+                for (const [name, id] of Object.entries(idData.Weapons)) {
+                    allWeaponsData[id] = name; // {ID: Name}
+                }
             } else {
                 // Fallback: Create placeholder weapon data for logic demonstration
                 const placeholderWeapons = { "1": "Major", "2": "Deckard", "3": "Geist", "4": "Cerberus", "5": "Master-Key", "6": "Icarus", "7": "Custodian", "8": "Vigil", "9": "Inhibitor", "10": "Sentinel", "11": "Helix", "12": "Warrant" };
@@ -310,6 +539,67 @@ document.addEventListener('DOMContentLoaded', () => {
         allSelects.forEach(select => {
             select.addEventListener('change', handleLoadoutChange);
         });
+
+        // --- Loadout Code UI ---
+        // Create input and button if not present
+        let codeContainer = document.getElementById('loadout-code-container');
+        if (!codeContainer) {
+            codeContainer = document.createElement('div');
+            codeContainer.id = 'loadout-code-container';
+            codeContainer.style.margin = '10px 0';
+
+            const input = document.createElement('input');
+            input.id = 'loadout-code-input';
+            input.type = 'text';
+            input.placeholder = 'Paste loadout code here';
+            input.style.width = '60%';
+            input.style.marginRight = '8px';
+
+            const btn = document.createElement('button');
+            btn.id = 'loadout-code-apply-btn';
+            btn.textContent = 'Enter';
+
+            const out = document.createElement('input');
+            out.id = 'loadout-code-output';
+            out.type = 'text';
+            out.readOnly = true;
+            out.style.width = '60%';
+            out.style.marginLeft = '8px';
+
+            codeContainer.appendChild(input);
+            codeContainer.appendChild(btn);
+            codeContainer.appendChild(out);
+
+            const root = document.querySelector('.container') || document.body;
+            root.insertBefore(codeContainer, root.firstChild);
+
+            // Wire button and input
+            btn.addEventListener('click', () => {
+                const v = document.getElementById('loadout-code-input').value.trim();
+                if (v) applyLoadoutCodeToFields(v);
+            });
+
+            // Allow Enter key to apply as well
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const v = input.value.trim();
+                    if (v) applyLoadoutCodeToFields(v);
+                }
+            });
+
+            // Keep output updated when selections change
+            const updateOutput = () => {
+                const code = generateLoadoutCode();
+                const outEl = document.getElementById('loadout-code-output');
+                if (outEl) outEl.value = code;
+            };
+
+            // When any select changes, update the output code
+            allSelects.forEach(s => s.addEventListener('change', updateOutput));
+            // Also run once now
+            updateOutput();
+        }
 
         // Run once on startup to ensure initial state and restrictions are applied
         updateLoadoutState();
@@ -536,10 +826,6 @@ applyModRestrictions(SECONDARY_MOD_SELECTS);
 applyModRestrictions(PRIMARY_MOD_SELECTS);
 
 
-        // The original script's custom ammo filtering logic (for Warrant, etc.) should be here.
-        // I will assume that the original ammo filtering logic (using DEFAULT_GENERAL_AMMO_IDS, etc.)
-        // is integrated here after the attachment restrictions are applied.
-        // For the scope of this request, I'll rely on the compatibility check from attachments.json.
     }
     
     /**
