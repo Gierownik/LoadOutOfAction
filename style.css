@@ -102,7 +102,7 @@ select option {
     background-color: hsl(170, 25%, 20%); /* Light background to visually distinguish it */
 }
 select option:first-child {
-    color: rgba(143, 255, 237, 0.5);
+    color: rgba(143, 255, 237, 0.5) !important;
     opacity: 0.3;
 }
 
