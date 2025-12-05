@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAttachmentsData = [];// Stores array of attachment objects (from attachments.json)
     let idDataGlobal = {};      // Raw id.json data for id -> name and name -> id lookups
     let reverseIdMaps = {};     // Reverse maps: category -> { id: name }
+    // IDs of Ammo types that require the Technician augment. Fill with numeric ID strings from id.json.
+    // Example: const TECHNICIAN_ONLY_AMMO_IDS = ['35','36'];
+    const TECHNICIAN_ONLY_AMMO_IDS = [];
 
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
@@ -450,8 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. Technician Augment Check
             if (isTechnicianRequired && !loadoutState.isTechnician) {
-                option.disabled = true;
-                option.title = true ? 'Requires the Technician Augment.' : '';
+                shouldShow = false;
                 restrictionReason = 'Requires the Technician Augment.';
             }
             
@@ -870,6 +872,28 @@ applyModRestrictions(SECONDARY_MOD_SELECTS);
 
 // Primary mods
 applyModRestrictions(PRIMARY_MOD_SELECTS);
+
+        // Technician-only ammo: grey out options unless Technician augment equipped
+        function updateTechnicianAmmoAvailability() {
+            const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
+            ammoSelectIds.forEach(selId => {
+                const sel = document.getElementById(selId);
+                if (!sel) return;
+                Array.from(sel.options).forEach(opt => {
+                    if (!opt.value) return; // skip placeholder
+                    if (TECHNICIAN_ONLY_AMMO_IDS.includes(String(opt.value))) {
+                        const shouldDisable = !loadoutState.isTechnician;
+                        // Don't disable the currently selected option to avoid flicker
+                        if (opt.value !== sel.value) {
+                            opt.disabled = shouldDisable;
+                        }
+                        opt.title = shouldDisable ? 'Requires the Technician augment.' : '';
+                    }
+                });
+            });
+        }
+
+        updateTechnicianAmmoAvailability();
 
 
     }
