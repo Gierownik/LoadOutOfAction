@@ -1097,7 +1097,47 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
         
         applyLoadoutRestrictions();
     }
+
+    /**
+     * Loads loadout from URL parameter if present
+     */
+    function loadLoadoutFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const loadoutCode = params.get('loadout');
+        
+        if (loadoutCode) {
+            const codeInput = document.getElementById('loadout-code-input');
+            if (codeInput) {
+                codeInput.value = loadoutCode;
+                applyLoadoutCodeToFields(loadoutCode);
+            }
+        }
+    }
+
+    /**
+     * Updates URL with current loadout code
+     */
+    function updateUrlWithLoadout() {
+        const code = generateLoadoutCode();
+        if (code) {
+            const url = new URL(window.location);
+            url.searchParams.set('loadout', code);
+            window.history.replaceState({}, '', url);
+        }
+    }
     
     // --- INITIALIZATION ---
     fetchAndPopulateData();
+
+    // Wait a moment for data to load, then check for URL loadout parameter
+    setTimeout(() => {
+        loadLoadoutFromUrl();
+    }, 500);
+
+    // Update URL whenever the loadout changes
+    document.addEventListener('change', (e) => {
+        if (e.target.tagName === 'SELECT') {
+            updateUrlWithLoadout();
+        }
+    }, true);
 });
