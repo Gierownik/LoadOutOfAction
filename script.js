@@ -257,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Build numeric string by iterating ENCODE_FIELDS and reading select values
         let numeric = '';
+        const debugParts = [];
         ENCODE_FIELDS.forEach(field => {
             const select = document.getElementById(field.id);
             let raw = '';
@@ -282,7 +283,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             numeric += raw.padStart(field.width, '0');
+            debugParts.push({ field: field.id, value: select ? select.value : null, resolvedId: raw || null, padded: raw.padStart(field.width, '0') });
         });
+
+        // Debug log the parts and numeric string so user can see what's encoded
+        try {
+            console.groupCollapsed('Loadout code generation');
+            console.log('Resolved parts:', debugParts);
+            console.log('Numeric string to encode:', numeric);
+            console.groupEnd();
+        } catch (e) {}
 
         // Convert numeric string to BigInt and then to base64
         const big = numeric ? BigInt(numeric) : 0n;
@@ -464,6 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Store global data
             idDataGlobal = idData || {};
+            // Debug: surface id.json load to console for troubleshooting
+            try { console.log('Loaded id.json keys:', Object.keys(idDataGlobal)); } catch (e) {}
             allDevicesData = devicesData.map(d => ({ ...d, id: d.name })); // Use name as ID since no IDs are provided
             allAttachmentsData = attachmentsData;
 
@@ -541,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // --- Loadout Code UI ---
-        // Create input and button if not present
+        // Wire existing input/button/output if present, otherwise create them
         let codeContainer = document.getElementById('loadout-code-container');
         if (!codeContainer) {
             codeContainer = document.createElement('div');
@@ -572,34 +584,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const root = document.querySelector('.container') || document.body;
             root.insertBefore(codeContainer, root.firstChild);
+        }
 
-            // Wire button and input
-            btn.addEventListener('click', () => {
-                const v = document.getElementById('loadout-code-input').value.trim();
+        // Elements (either existing in HTML or newly created)
+        const codeInput = document.getElementById('loadout-code-input');
+        const codeBtn = document.getElementById('loadout-code-apply-btn');
+        const codeOut = document.getElementById('loadout-code-output');
+
+        // Wire interactions (idempotent wiring is fine)
+        if (codeBtn && codeInput) {
+            codeBtn.addEventListener('click', () => {
+                const v = codeInput.value.trim();
                 if (v) applyLoadoutCodeToFields(v);
             });
 
-            // Allow Enter key to apply as well
-            input.addEventListener('keydown', (e) => {
+            codeInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const v = input.value.trim();
+                    const v = codeInput.value.trim();
                     if (v) applyLoadoutCodeToFields(v);
                 }
             });
-
-            // Keep output updated when selections change
-            const updateOutput = () => {
-                const code = generateLoadoutCode();
-                const outEl = document.getElementById('loadout-code-output');
-                if (outEl) outEl.value = code;
-            };
-
-            // When any select changes, update the output code
-            allSelects.forEach(s => s.addEventListener('change', updateOutput));
-            // Also run once now
-            updateOutput();
         }
+
+        const updateOutput = () => {
+            if (!codeOut) return;
+            const code = generateLoadoutCode();
+            codeOut.value = code || '';
+        };
+
+        // When any select changes, update the output code
+        allSelects.forEach(s => s.addEventListener('change', updateOutput));
+        // Also run once now
+        updateOutput();
 
         // Run once on startup to ensure initial state and restrictions are applied
         updateLoadoutState();
