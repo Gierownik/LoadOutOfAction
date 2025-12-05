@@ -608,6 +608,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const codeBtn = document.getElementById('loadout-code-apply-btn');
         const codeOut = document.getElementById('loadout-code-output');
 
+        // Add copy button if it doesn't exist
+        let copyBtn = document.getElementById('loadout-code-copy-btn');
+        if (!copyBtn) {
+            copyBtn = document.createElement('button');
+            copyBtn.id = 'loadout-code-copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.style.marginLeft = '4px';
+            codeContainer.appendChild(copyBtn);
+
+            copyBtn.addEventListener('click', () => {
+                if (codeOut.value) {
+                    navigator.clipboard.writeText(codeOut.value).then(() => {
+                        // Visual feedback
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                        }, 2000);
+                    });
+                }
+            });
+        }
+
         // Add randomize button
         const randomizeBtn = document.createElement('button');
         randomizeBtn.id = 'randomize-loadout-btn';
