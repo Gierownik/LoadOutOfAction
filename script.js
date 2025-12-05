@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let reverseIdMaps = {};     // Reverse maps: category -> { id: name }
     // IDs of Ammo types that require the Technician augment. Fill with numeric ID strings from id.json.
     // Example: const TECHNICIAN_ONLY_AMMO_IDS = ['35','36'];
-    const TECHNICIAN_ONLY_AMMO_IDS = [];
+    const TECHNICIAN_ONLY_AMMO_IDS = ['46','24','23','22','36','40'];
 
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
