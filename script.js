@@ -23,9 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAttachmentsData = [];// Stores array of attachment objects (from attachments.json)
     let idDataGlobal = {};      // Raw id.json data for id -> name and name -> id lookups
     let reverseIdMaps = {};     // Reverse maps: category -> { id: name }
-    // IDs of Ammo types that require the Technician augment. Fill with numeric ID strings from id.json.
-    // Example: const TECHNICIAN_ONLY_AMMO_IDS = ['35','36'];
-    const TECHNICIAN_ONLY_AMMO_IDS = ['46','24','23','22','36','40'];
+    // Technician-only ammo IDs (populated after loading attachments/id.json)
+    let TECHNICIAN_ONLY_AMMO_IDS = [];
 
     // Hardcoded weapon category map (ID to Type)
     // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
@@ -531,6 +530,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const placeholderWeapons = { "1": "Major", "2": "Deckard", "3": "Geist", "4": "Cerberus", "5": "Master-Key", "6": "Icarus", "7": "Custodian", "8": "Vigil", "9": "Inhibitor", "10": "Sentinel", "11": "Helix", "12": "Warrant" };
                 for (const [id, name] of Object.entries(placeholderWeapons)) { allWeaponsData[id] = name; }
             }
+
+            // Build technician-only ammo list dynamically from attachments.json and id.json (Ammo mapping)
+            try {
+                TECHNICIAN_ONLY_AMMO_IDS = [];
+                if (Array.isArray(allAttachmentsData) && idData && idData.Ammo) {
+                    for (const att of allAttachmentsData) {
+                        if (!att || att.type !== 'Ammo') continue;
+                        if (att.technician !== "true") continue;
+                        const name = att.name;
+                        let id = idData.Ammo[name];
+                        if (!id) {
+                            const found = Object.entries(idData.Ammo).find(([n, i]) => n.toLowerCase() === String(name).toLowerCase());
+                            if (found) id = found[1];
+                        }
+                        if (id) TECHNICIAN_ONLY_AMMO_IDS.push(String(id));
+                    }
+                    TECHNICIAN_ONLY_AMMO_IDS = Array.from(new Set(TECHNICIAN_ONLY_AMMO_IDS));
+                }
+                console.log('Technician-only ammo ids (computed):', TECHNICIAN_ONLY_AMMO_IDS);
+            } catch (e) { console.warn('Error building TECHNICIAN_ONLY_AMMO_IDS', e); }
 
             // Return combined data for initial population
             return { ...idData, Devices: allDevicesData };
