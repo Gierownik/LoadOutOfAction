@@ -8,10 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot and allows heavy weapons
     const AUGMENT_EXPERIMENTAL = "17";    // Required for experimental devices
     const AUGMENT_NEUROHACKER = "68";     // Placeholder ID for Neurohacker (assumed next ID)
-    const AUGMENT_PROFESSIONAL = "50"; // replace with actual ID
-    const AUGMENT_STUDIED = "76";      // replace with actual ID
+    const AUGMENT_PROFESSIONAL = "50";    // replace with actual ID
+    const AUGMENT_STUDIED = "76";         // replace with actual ID
 
-    
     // Device Names requiring Neurohacker (since IDs are unavailable)
     const DEVICE_LOCKDOWN_NAME = "Lockdown";
     const DEVICE_CASCADE_NAME = "Cascade";
@@ -23,32 +22,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAttachmentsData = [];// Stores array of attachment objects (from attachments.json)
 
     // Hardcoded weapon category map (ID to Type)
-    // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
     const WEAPON_CATEGORIES = {
         "2":"secondary", // Major
-"3":"secondary", // Deckard
-"7":"primary", // Icarus
-"6":"primary", // Master-Key
-"5":"secondary", // Cerberus
-"9":"primary", // Vigil
-"1":"backup", // TTK
-"8":"primary", // Custodian
-"4":"secondary", // Geist
-"10":"primary", // Inhibitor
-"11":"primary", // Sentinel
-"12":"primary", // Warrant
-"13":"primary", // Helix
-"14":"primary", // Nexus
-"15":"heavy", // Umibozu
-"16":"heavy", // Blackout
-"17":"backup", // Akanami
-"18":"primary", // Typhon
-"19":"secondary", // Omen
-"20":"heavy", // Hole-Punch
-"21":"secondary", // Double-Tap
-"22":"backup", // Dusters
-"23":"backup" // Fists
-
+        "3":"secondary", // Deckard
+        "7":"primary",   // Icarus
+        "6":"primary",   // Master-Key
+        "5":"secondary", // Cerberus
+        "9":"primary",   // Vigil
+        "1":"backup",    // TTK
+        "8":"primary",   // Custodian
+        "4":"secondary", // Geist
+        "10":"primary",  // Inhibitor
+        "11":"primary",  // Sentinel
+        "12":"primary",  // Warrant
+        "13":"primary",  // Helix
+        "14":"primary",  // Nexus
+        "15":"heavy",    // Umibozu
+        "16":"heavy",    // Blackout
+        "17":"backup",   // Akanami
+        "18":"primary",  // Typhon
+        "19":"secondary",// Omen
+        "20":"heavy",    // Hole-Punch
+        "21":"secondary",// Double-Tap
+        "22":"backup",   // Dusters
+        "23":"backup"    // Fists
     };
 
     // Lists of element IDs for easy iteration
@@ -93,8 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         select.innerHTML = '<option value="">--- Select ---</option>';
 
         const items = (Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name })))
-    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
-
+            .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
 
         items.forEach(item => {
             const id = item.id || item.name;
@@ -109,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // New helper function to populate weapon selects with category filtering and slot renaming
+    // Populate weapon selects with category filtering and slot renaming
     function populateWeaponSelect(selectId, allWeaponsMap, weaponCategories, isHeavyWeaponsAugment) {
         const select = document.getElementById(selectId);
         if (!select) return;
@@ -137,16 +133,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Augment rules
-        // Versatile: primary & secondary slots can equip backup, secondary, primary
         if (loadoutState.isVersatile && (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select')) {
             allowedCategories = ['primary', 'secondary', 'backup'];
         }
 
-        // Studied removes primary and secondary everywhere (including versatile-expanded lists)
+        // Studied removes primary and secondary everywhere
         if (loadoutState.isStudied) {
             allowedCategories = allowedCategories.filter(c => c !== 'primary' && c !== 'secondary');
         } else {
-            // Professional removes primary everywhere (except backup which doesn't have primary anyway)
+            // Professional removes primary everywhere
             if (loadoutState.isProfessional) {
                 allowedCategories = allowedCategories.filter(c => c !== 'primary');
             }
@@ -170,10 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-
     /**
-     * Function to filter and populate attachment selects based on augments and weapon compatibility.
+     * Filter and populate attachment selects based on augments and weapon compatibility.
      */
     function applyAttachmentRestrictions(selectId, weaponName, attachmentType) {
         const select = document.getElementById(selectId);
@@ -190,31 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         relevantAttachments.forEach(attachment => {
             const isTechnicianRequired = attachment.technician === "true";
-            // Check compatibility using the weapon's *name* (e.g., "Major")
             const isCompatible = attachment.compatibility.includes(weaponName);
             
             let shouldShow = true;
-
-            // 1. Technician Augment Check
-            if (isTechnicianRequired && !loadoutState.isTechnician) {
-                shouldShow = false;
-                restrictionReason = 'Requires the Technician Augment.';
-            }
-            
-            // 2. Weapon Compatibility Check (read from attachments.json)
-            if (!isCompatible) {
-                shouldShow = false;
-                restrictionReason = 'Not compatible with ' + weaponName + '.';
-            }
+            if (isTechnicianRequired && !loadoutState.isTechnician) shouldShow = false;
+            if (!isCompatible) shouldShow = false;
 
             if (shouldShow) {
-                // Assuming attachment name is unique and can be used as the value.
                 const option = document.createElement('option');
                 option.value = attachment.name;
                 option.textContent = attachment.name;
-                if (attachment.name === currentValue) {
-                    option.selected = true;
-                }
+                if (attachment.name === currentValue) option.selected = true;
                 select.appendChild(option);
             }
         });
@@ -227,12 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATA LOADING & POPULATION ---
 
-    /**
-     * Function to fetch and parse all required JSON files.
-     */
     async function fetchLoadoutData() {
         try {
-            // Fetch all three files
             const [idResponse, devicesResponse, attachmentsResponse] = await Promise.all([
                 fetch('id.json'),
                 fetch('devices.json'),
@@ -251,18 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
             allDevicesData = devicesData.map(d => ({ ...d, id: d.name })); // Use name as ID since no IDs are provided
             allAttachmentsData = attachmentsData;
             
-            // Create a map of Weapon ID: Name for easy lookup (assuming idData.Weapons exists)
+            // Weapon ID: Name map
             if (idData.Weapons) {
                  for (const [name, id] of Object.entries(idData.Weapons)) {
                      allWeaponsData[id] = name; // {ID: Name}
                  }
             } else {
-                // Fallback: Create placeholder weapon data for logic demonstration
                 const placeholderWeapons = { "1": "Major", "2": "Deckard", "3": "Geist", "4": "Cerberus", "5": "Master-Key", "6": "Icarus", "7": "Custodian", "8": "Vigil", "9": "Inhibitor", "10": "Sentinel", "11": "Helix", "12": "Warrant" };
                 for (const [id, name] of Object.entries(placeholderWeapons)) { allWeaponsData[id] = name; }
             }
 
-            // Return combined data for initial population
             return { ...idData, Devices: allDevicesData };
 
         } catch (error) {
@@ -272,9 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    /**
-     * Initial data population and setup.
-     */
     async function fetchAndPopulateData() {
         const data = await fetchLoadoutData();
         if (!data) return; 
@@ -282,23 +252,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Store Ammo data for restriction checks
         allAmmoData = data.Ammo; 
 
-        // --- Initial Population using fetched data ---
+        // Initial population
         populateSelect('shell-select', data.Shells);
-        
         AUGMENT_SELECTS.forEach(id => populateSelect(id, data.Augments));
-        
-        // Populate devices (using names as IDs)
         populateSelect('device-1-select', allDevicesData);
         populateSelect('device-2-select', allDevicesData);
-        
-        // Weapons (Initial call without Heavy Weapons augment)
-        const allWeaponsMapNameID = data.Weapons || {};
+
         updateLoadoutState();
         populateWeaponSelect('backup-weapon-select', allWeaponsData, WEAPON_CATEGORIES, false);
         populateWeaponSelect('secondary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, false);
         populateWeaponSelect('primary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, false);
 
-        // Populate attachments (temporarily populate with all, filtering will happen in applyLoadoutRestrictions)
         populateSelect('secondary-optic-select', data.Optics);
         populateSelect('secondary-ammo-select', data.Ammo);
         SECONDARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
@@ -307,29 +271,23 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSelect('primary-ammo-select', data.Ammo);
         PRIMARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
         
-        // --- Add Event Listeners ---
+        // Listeners
         const allSelects = document.querySelectorAll('.container select');
         allSelects.forEach(select => {
             select.addEventListener('change', handleLoadoutChange);
         });
 
-        // Run once on startup to ensure initial state and restrictions are applied
+        // Apply once
         updateLoadoutState();
         applyLoadoutRestrictions();
 
-        // After initial population, ensure the Loadout Code (added below) reflects current state
-        if (typeof updateLoadoutCode === 'function') {
-            updateLoadoutCode();
-        }
+        // Reflect current state in Loadout Code (added below)
+        updateLoadoutCode();
     }
 
     // --- LOGIC & RESTRICTIONS ---
 
-    /**
-     * Updates the global loadout state based on current selections.
-     */
     function updateLoadoutState() {
-        // Helper to get all selected values from a list of select IDs
         const getValues = (ids) => ids.map(id => document.getElementById(id)?.value).filter(val => val);
         
         loadoutState.augments = getValues(AUGMENT_SELECTS);
@@ -346,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadoutState.modsSecondary = getValues(SECONDARY_MOD_SELECTS);
         loadoutState.modsPrimary = getValues(PRIMARY_MOD_SELECTS);
 
-        // Check for special augments
         loadoutState.isTechnician = loadoutState.augments.includes(AUGMENT_TECHNICIAN);
         loadoutState.isVersatile = loadoutState.augments.includes(AUGMENT_VERSATILE);
         loadoutState.isHeavyWeapons = loadoutState.augments.includes(AUGMENT_HEAVY_WEAPONS);
@@ -354,12 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadoutState.isNeurohacker = loadoutState.augments.includes(AUGMENT_NEUROHACKER);
         loadoutState.isProfessional = loadoutState.augments.includes(AUGMENT_PROFESSIONAL);
         loadoutState.isStudied = loadoutState.augments.includes(AUGMENT_STUDIED);
-
     }
     
-    /**
-     * Applies all loadout restrictions.
-     */
     function applyLoadoutRestrictions() {
         updateLoadoutState();
 
@@ -368,99 +321,83 @@ document.addEventListener('DOMContentLoaded', () => {
         populateWeaponSelect('secondary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
         populateWeaponSelect('primary-weapon-select', allWeaponsData, WEAPON_CATEGORIES, loadoutState.isHeavyWeapons);
 
-        // ...keep your uniqueness enforcement on weapons here (no duplicates across slots)...
-
+        // Weapon uniqueness enforcement (no duplicates across slots)
         WEAPON_SELECTS.forEach(currentSelectId => {
-             const currentSelect = document.getElementById(currentSelectId);
-             const currentValue = currentSelect?.value;
-             if (!currentValue) return;
+            const currentSelect = document.getElementById(currentSelectId);
+            const currentValue = currentSelect?.value;
+            if (!currentValue) return;
 
-             // Always enforce weapon uniqueness
-             const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id && id !== currentValue);
-             const isDuplicate = otherSelectedWeapons.includes(currentValue);
+            const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id && id !== currentValue);
+            const isDuplicate = otherSelectedWeapons.includes(currentValue);
 
-             // Disable duplicate option in the current select
-             Array.from(currentSelect.options).forEach(option => {
-                 if (option.value && option.value !== currentValue) {
-                     // Check against ALL other selected weapons in the other slots
-                     const otherWeapons = loadoutState.weapons.all.filter(id => id !== option.value && id);
-                     const shouldDisable = otherWeapons.includes(option.value);
-                     option.disabled = shouldDisable;
-                     option.title = shouldDisable ? 'Cannot equip multiple of the same weapon.' : '';
-                 }
-             });
-             
-             // Visual indication for invalid selection (e.g. if another select triggered the duplication)
-             if (isDuplicate) {
-                 currentSelect.classList.add('invalid-selection');
-             } else {
-                 currentSelect.classList.remove('invalid-selection');
-             }
+            Array.from(currentSelect.options).forEach(option => {
+                if (option.value && option.value !== currentValue) {
+                    const otherWeapons = loadoutState.weapons.all.filter(id => id !== option.value && id);
+                    const shouldDisable = otherWeapons.includes(option.value);
+                    option.disabled = shouldDisable;
+                    option.title = shouldDisable ? 'Cannot equip multiple of the same weapon.' : '';
+                }
+            });
+            
+            if (isDuplicate) currentSelect.classList.add('invalid-selection');
+            else currentSelect.classList.remove('invalid-selection');
         });
+
+        // Mod uniqueness
         function applyModRestrictions(modSelectIds) {
-    // Collect currently selected mods
-    const selectedMods = modSelectIds
-        .map(id => document.getElementById(id)?.value)
-        .filter(val => val);
+            const selectedMods = modSelectIds
+                .map(id => document.getElementById(id)?.value)
+                .filter(val => val);
 
-    modSelectIds.forEach(selectId => {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        const currentValue = select.value;
+            modSelectIds.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (!select) return;
+                const currentValue = select.value;
 
-        Array.from(select.options).forEach(option => {
-            if (!option.value) return; // skip placeholder
+                Array.from(select.options).forEach(option => {
+                    if (!option.value) return; // skip placeholder
+                    const isSelectedElsewhere = selectedMods.includes(option.value) && option.value !== currentValue;
+                    option.disabled = isSelectedElsewhere;
+                    option.title = isSelectedElsewhere ? "Already equipped in another mod slot." : "";
+                });
 
-            const isSelectedElsewhere =
-                selectedMods.includes(option.value) && option.value !== currentValue;
+                const duplicates = selectedMods.filter(val => val === currentValue);
+                if (duplicates.length > 1) select.classList.add("invalid-selection");
+                else select.classList.remove("invalid-selection");
+            });
+        }
+        applyModRestrictions(SECONDARY_MOD_SELECTS);
+        applyModRestrictions(PRIMARY_MOD_SELECTS);
 
-            option.disabled = isSelectedElsewhere;
-            option.title = isSelectedElsewhere
-                ? "Already equipped in another mod slot."
-                : "";
+        // Augment uniqueness
+        AUGMENT_SELECTS.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+
+            Array.from(select.options).forEach(option => {
+                const augmentId = option.value;
+
+                const otherAugments = AUGMENT_SELECTS
+                    .filter(id => id !== selectId)
+                    .map(id => document.getElementById(id)?.value)
+                    .filter(val => val);
+
+                const alreadySelected = otherAugments.includes(augmentId);
+
+                if (augmentId !== currentValue) {
+                    option.disabled = alreadySelected;
+                    option.title = alreadySelected ? 'Already equipped in another slot.' : '';
+                }
+
+                if (augmentId === currentValue && alreadySelected) {
+                    select.classList.add('invalid-selection');
+                } else if (augmentId === currentValue) {
+                    select.classList.remove('invalid-selection');
+                }
+            });
         });
 
-        // Mark invalid if current selection is duplicated
-        const duplicates = selectedMods.filter(val => val === currentValue);
-        if (duplicates.length > 1) {
-            select.classList.add("invalid-selection");
-        } else {
-            select.classList.remove("invalid-selection");
-        }
-    });
-}
-
-AUGMENT_SELECTS.forEach(selectId => {
-    const select = document.getElementById(selectId);
-    const currentValue = select.value;
-
-    Array.from(select.options).forEach(option => {
-        const augmentId = option.value;
-
-        // --- Already selected in another slot? ---
-        const otherAugments = AUGMENT_SELECTS
-            .filter(id => id !== selectId)
-            .map(id => document.getElementById(id)?.value)
-            .filter(val => val);
-
-        const alreadySelected = otherAugments.includes(augmentId);
-
-        // Apply disable
-        if (augmentId !== currentValue) {
-            option.disabled = alreadySelected;
-            option.title = alreadySelected ? 'Already equipped in another slot.' : '';
-        }
-
-        // Mark invalid if current selection is invalid
-        if (augmentId === currentValue && alreadySelected) {
-            select.classList.add('invalid-selection');
-        } else if (augmentId === currentValue) {
-            select.classList.remove('invalid-selection');
-        }
-    });
-});
-
-        // 2. Device Augment Requirements (Neurohacker and Experimental)
+        // Device rules (requirements + uniqueness unless Versatile)
         DEVICE_SELECTS.forEach(selectId => {
             const select = document.getElementById(selectId);
             const currentValue = select.value;
@@ -480,7 +417,6 @@ AUGMENT_SELECTS.forEach(selectId => {
                 let shouldDisable = false;
                 let restrictionReason = '';
 
-                // Base requirements
                 if (requiresNeurohacker && !loadoutState.isNeurohacker) {
                     shouldDisable = true;
                     restrictionReason = 'Requires the Neurohacker Augment.';
@@ -489,14 +425,12 @@ AUGMENT_SELECTS.forEach(selectId => {
                     restrictionReason = 'Requires the Experimental Augment.';
                 }
 
-                // Uniqueness (unless Versatile allows duplicates)
                 const isDuplicate = otherDeviceValues.includes(option.value);
                 if (isDuplicate && !loadoutState.isVersatile) {
                     shouldDisable = true;
                     restrictionReason = 'Already Equipped in another slot.';
                 }
 
-                // Studied restriction: only allow specific devices
                 if (loadoutState.isStudied) {
                     const allowedStudiedDevices = ["Bolster", "Overcharge", "Shroud", "Reserve Stim"];
                     const isAllowedByStudied = allowedStudiedDevices.includes(deviceName);
@@ -506,13 +440,11 @@ AUGMENT_SELECTS.forEach(selectId => {
                     }
                 }
 
-                // Apply the disable and tooltip (don’t change current option to avoid flicker)
                 if (option.value !== currentValue) {
                     option.disabled = shouldDisable;
                     option.title = shouldDisable ? restrictionReason : '';
                 }
 
-                // Mark invalid if current selection is now illegal
                 if (option.value === currentValue && shouldDisable) {
                     select.classList.add('invalid-selection');
                 } else if (option.value === currentValue) {
@@ -521,42 +453,23 @@ AUGMENT_SELECTS.forEach(selectId => {
             });
         });
 
-
-        // 5. Attachment Augment and Compatibility Requirements
-        // Map selected weapon ID to its Name (e.g., "1" -> "Major")
+        // Attachment compatibility
         const secondaryWeaponName = allWeaponsData[loadoutState.weapons.secondary];
         const primaryWeaponName = allWeaponsData[loadoutState.weapons.primary];
 
-        // Secondary Weapon Attachments
         applyAttachmentRestrictions('secondary-optic-select', secondaryWeaponName, 'Optic');
         applyAttachmentRestrictions('secondary-ammo-select', secondaryWeaponName, 'Ammo');
         SECONDARY_MOD_SELECTS.forEach(id => applyAttachmentRestrictions(id, secondaryWeaponName, 'Mod'));
 
-        // Primary Weapon Attachments
         applyAttachmentRestrictions('primary-optic-select', primaryWeaponName, 'Optic');
         applyAttachmentRestrictions('primary-ammo-select', primaryWeaponName, 'Ammo');
         PRIMARY_MOD_SELECTS.forEach(id => applyAttachmentRestrictions(id, primaryWeaponName, 'Mod'));
-        // Secondary mods
-applyModRestrictions(SECONDARY_MOD_SELECTS);
-
-// Primary mods
-applyModRestrictions(PRIMARY_MOD_SELECTS);
-
-
-        // The original script's custom ammo filtering logic (for Warrant, etc.) should be here.
-        // I will assume that the original ammo filtering logic (using DEFAULT_GENERAL_AMMO_IDS, etc.)
-        // is integrated here after the attachment restrictions are applied.
-        // For the scope of this request, I'll rely on the compatibility check from attachments.json.
     }
     
-    /**
-     * Main event handler for all select changes.
-     */
     function handleLoadoutChange(event) {
-        // Clear any previous invalid selection visual indications before re-evaluating
         document.querySelectorAll('.invalid-selection').forEach(el => el.classList.remove('invalid-selection'));
-        
         applyLoadoutRestrictions();
+        updateLoadoutCode(); // keep the code in sync
     }
     
     // --- INITIALIZATION ---
@@ -564,10 +477,10 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
 
 
     // =======================
-    // === LOADOUT CODE SYSTEM (appended, non-invasive)
+    // === LOADOUT CODE SYSTEM (compact binary Base64)
     // =======================
 
-    // Create and insert the Loadout Code field dynamically (middle of container)
+    // Insert a Loadout Code field dynamically
     (function insertLoadoutCodeField() {
         const container = document.querySelector('.container') || document.body;
         const wrapper = document.createElement('div');
@@ -589,7 +502,6 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
         wrapper.appendChild(document.createTextNode(' '));
         wrapper.appendChild(input);
 
-        // Try to insert roughly in the middle if container has children
         const children = container.children;
         const insertIndex = Math.floor(children.length / 2);
         if (children.length > 0 && children[insertIndex]) {
@@ -597,123 +509,161 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
         } else {
             container.appendChild(wrapper);
         }
+
+        // Wire change listener
+        input.addEventListener('change', (e) => {
+            populateFromCode(e.target.value.trim());
+        });
     })();
 
-    // Build fixed-length decimal string from current selections
-    function generateLoadoutDecimal() {
-        const shell = document.getElementById('shell-select')?.value || "0";
-        const backup = (document.getElementById('backup-weapon-select')?.value || "0").padStart(2,"0");
-        const secondary = (document.getElementById('secondary-weapon-select')?.value || "0").padStart(2,"0");
-        const primary = (document.getElementById('primary-weapon-select')?.value || "0").padStart(2,"0");
+    // Helpers: safe parsing and packing
+    function toByte(valStr) {
+        // Two-digit (00-99) or single-digit (0-9) values go into one byte
+        const n = parseInt(valStr || "0", 10);
+        if (isNaN(n)) return 0;
+        return Math.max(0, Math.min(255, n));
+    }
+    function toTwoBytes(valStr) {
+        // Three-digit (000-999) augment values packed as two bytes (big-endian)
+        const n = parseInt(valStr || "0", 10);
+        const clamped = Math.max(0, Math.min(999, isNaN(n) ? 0 : n));
+        const hi = (clamped >> 8) & 0xFF;   // high byte
+        const lo = clamped & 0xFF;          // low byte
+        return [hi, lo];
+    }
+    function fromTwoBytes(hi, lo) {
+        return ((hi & 0xFF) << 8) + (lo & 0xFF);
+    }
 
-        const sidearmAttachments = [
-            document.getElementById('secondary-optic-select')?.value || "0",
-            document.getElementById('secondary-ammo-select')?.value || "0",
-            ...SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value || "0")
-        ].map(v => v.padStart(2,"0")).join("");
+    // Build compact bytes from current selections
+    function buildLoadoutBytes() {
+        // Shell: 1 byte
+        const shell = toByte(document.getElementById('shell-select')?.value);
 
-        const primaryAttachments = [
-            document.getElementById('primary-optic-select')?.value || "0",
-            document.getElementById('primary-ammo-select')?.value || "0",
-            ...PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value || "0")
-        ].map(v => v.padStart(2,"0")).join("");
+        // Weapons: 3 bytes (each two-digit id)
+        const backup = toByte(document.getElementById('backup-weapon-select')?.value);
+        const secondary = toByte(document.getElementById('secondary-weapon-select')?.value);
+        const primary = toByte(document.getElementById('primary-weapon-select')?.value);
 
-        const augments = AUGMENT_SELECTS
-            .map(id => document.getElementById(id)?.value || "0")
-            .map(v => v.padStart(3,"0"))
-            .join("");
+        // Sidearm attachments (6 × 1 byte)
+        const sidearmFields = [
+            document.getElementById('secondary-optic-select')?.value,
+            document.getElementById('secondary-ammo-select')?.value,
+            ...SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value)
+        ].map(toByte);
 
+        // Primary attachments (6 × 1 byte)
+        const primaryFields = [
+            document.getElementById('primary-optic-select')?.value,
+            document.getElementById('primary-ammo-select')?.value,
+            ...PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value)
+        ].map(toByte);
+
+        // Augments (4 × 2 bytes)
+        const augmentPairs = AUGMENT_SELECTS
+            .map(id => toTwoBytes(document.getElementById(id)?.value))
+            .flat();
+
+        // Devices (2 × 1 byte)
         const devices = DEVICE_SELECTS
-            .map(id => document.getElementById(id)?.value || "0")
-            .map(v => v.padStart(2,"0"))
-            .join("");
+            .map(id => toByte(document.getElementById(id)?.value));
 
-        return shell + backup + secondary + primary + sidearmAttachments + primaryAttachments + augments + devices;
+        // Total bytes: 1 + 3 + 6 + 6 + 8 + 2 = 26
+        const bytes = [
+            shell,
+            backup, secondary, primary,
+            ...sidearmFields,
+            ...primaryFields,
+            ...augmentPairs,
+            ...devices
+        ];
+        return new Uint8Array(bytes);
     }
 
-    // Encode to Base64
-    function decimalToBase64(decimalString) {
-        return btoa(decimalString);
+    // Convert bytes <-> Base64 safely
+    function bytesToBase64(bytes) {
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
     }
-
-    // Decode from Base64
-    function base64ToDecimal(base64String) {
+    function base64ToBytes(b64) {
         try {
-            return atob(base64String);
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
         } catch (e) {
             alert("Invalid Loadout Code");
             return null;
         }
     }
 
-    // Update the Loadout Code input value (called after any change)
+    // Update the Loadout Code input value
     function updateLoadoutCode() {
         const field = document.getElementById('loadout-code');
         if (!field) return;
-        const decimalString = generateLoadoutDecimal();
-        const base64Code = decimalToBase64(decimalString);
-        field.value = base64Code;
+        const bytes = buildLoadoutBytes();
+        field.value = bytesToBase64(bytes);
     }
 
-    // Populate UI from a pasted Loadout Code
-    function populateFromCode(base64String) {
-        const decimalString = base64ToDecimal(base64String.trim());
-        if (!decimalString) return;
+    // Populate UI from a code (decode bytes back to ids)
+    function populateFromCode(b64) {
+        const bytes = base64ToBytes(b64);
+        if (!bytes) return;
 
-        let index = 0;
-        const shell = decimalString.slice(index, index+1); index += 1;
-        const backup = decimalString.slice(index, index+2); index += 2;
-        const secondary = decimalString.slice(index, index+2); index += 2;
-        const primary = decimalString.slice(index, index+2); index += 2;
+        // Expect exactly 26 bytes
+        if (bytes.length !== 26) {
+            alert("Loadout Code has an unexpected length.");
+            return;
+        }
 
-        const sidearmAttachments = [];
-        for (let i=0; i<6; i++) { sidearmAttachments.push(decimalString.slice(index, index+2)); index += 2; }
+        let i = 0;
+        const shell = bytes[i++];
 
-        const primaryAttachments = [];
-        for (let i=0; i<6; i++) { primaryAttachments.push(decimalString.slice(index, index+2)); index += 2; }
+        const backup = bytes[i++];
+        const secondary = bytes[i++];
+        const primary = bytes[i++];
+
+        const sidearmAttachments = bytes.slice(i, i+6); i += 6;
+        const primaryAttachments = bytes.slice(i, i+6); i += 6;
 
         const augments = [];
-        for (let i=0; i<4; i++) { augments.push(decimalString.slice(index, index+3)); index += 3; }
+        for (let a = 0; a < 4; a++) {
+            const hi = bytes[i++], lo = bytes[i++];
+            augments.push(fromTwoBytes(hi, lo));
+        }
 
-        const devices = [];
-        for (let i=0; i<2; i++) { devices.push(decimalString.slice(index, index+2)); index += 2; }
+        const devices = bytes.slice(i, i+2); i += 2;
 
-        // Assign values
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        // Set values (convert numbers back to strings)
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = String(v); };
 
         setVal('shell-select', shell);
+
         setVal('backup-weapon-select', backup);
         setVal('secondary-weapon-select', secondary);
         setVal('primary-weapon-select', primary);
 
         setVal('secondary-optic-select', sidearmAttachments[0]);
         setVal('secondary-ammo-select', sidearmAttachments[1]);
-        SECONDARY_MOD_SELECTS.forEach((id, i) => setVal(id, sidearmAttachments[i+2]));
+        SECONDARY_MOD_SELECTS.forEach((id, idx) => setVal(id, sidearmAttachments[idx+2]));
 
         setVal('primary-optic-select', primaryAttachments[0]);
         setVal('primary-ammo-select', primaryAttachments[1]);
-        PRIMARY_MOD_SELECTS.forEach((id, i) => setVal(id, primaryAttachments[i+2]));
+        PRIMARY_MOD_SELECTS.forEach((id, idx) => setVal(id, primaryAttachments[idx+2]));
 
-        AUGMENT_SELECTS.forEach((id, i) => setVal(id, augments[i]));
-        DEVICE_SELECTS.forEach((id, i) => setVal(id, devices[i]));
+        AUGMENT_SELECTS.forEach((id, idx) => setVal(id, augments[idx]));
+        DEVICE_SELECTS.forEach((id, idx) => setVal(id, devices[idx]));
 
-        // Re-apply your existing logic
         applyLoadoutRestrictions();
         updateLoadoutCode();
     }
 
-    // Wire up the Loadout Code input
-    (function wireLoadoutCodeInput() {
-        const field = document.getElementById('loadout-code');
-        if (!field) return;
-
-        // When user pastes/changes code, populate the UI
-        field.addEventListener('change', (e) => {
-            populateFromCode(e.target.value);
-        });
-    })();
-
-    // Non-invasive: also update the code whenever any select changes (without touching your existing listeners)
+    // Also update code when anything in the container changes
     (function mirrorChangesToCode() {
         const container = document.querySelector('.container') || document.body;
         container.addEventListener('change', () => {
