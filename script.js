@@ -368,12 +368,40 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!select) return;
             const category = SELECT_TO_CATEGORY[selectId];
             const name = (category && reverseIdMaps[category]) ? reverseIdMaps[category][idValue] : null;
-            if (name && select.querySelector(`option[value="${name}"]`)) {
-                select.value = name;
-            } else {
-                // If idValue matches an option value directly, set it
-                if (idValue && select.querySelector(`option[value="${idValue}"]`)) select.value = idValue;
+
+            // Try several matching strategies in order to be resilient to whether options use ids or names:
+            // 1) option.value === idValue
+            // 2) option.value === name (id->name mapping from id.json)
+            // 3) option.textContent === name
+            // 4) case-insensitive matches on textContent
+            if (idValue) {
+                // 1
+                const byValue = Array.from(select.options).find(o => o.value === idValue);
+                if (byValue) { select.value = idValue; return; }
             }
+            if (name) {
+                // 2
+                const byNameValue = Array.from(select.options).find(o => o.value === name);
+                if (byNameValue) { select.value = name; return; }
+
+                // 3
+                const byText = Array.from(select.options).find(o => (o.textContent || '') === name);
+                if (byText) { select.value = byText.value; return; }
+
+                // 4 - case-insensitive partial match
+                const lower = name.toLowerCase();
+                const byTextCI = Array.from(select.options).find(o => (o.textContent || '').toLowerCase() === lower || (o.textContent || '').toLowerCase().includes(lower));
+                if (byTextCI) { select.value = byTextCI.value; return; }
+            }
+
+            // Fallback: if any option's text contains the numeric idValue, pick it
+            if (idValue) {
+                const byTextContainsId = Array.from(select.options).find(o => (o.textContent || '').includes(idValue));
+                if (byTextContainsId) { select.value = byTextContainsId.value; return; }
+            }
+
+            // final fallback: clear
+            select.value = '';
         };
 
         setAttachmentById('secondary-optic-select', decoded['secondary-optic-select']);
