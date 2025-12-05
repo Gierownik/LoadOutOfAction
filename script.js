@@ -89,18 +89,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentValue = select.value;
         select.innerHTML = '<option value="">--- Select ---</option>';
 
-        const items = (Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name })))
-            .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+        const items = Array.isArray(dataMap)
+            ? dataMap
+            : Object.entries(dataMap).map(([name, id]) => ({ id, name }));
+
+        items.sort((a, b) => a.name.localeCompare(b.name));
 
         items.forEach(item => {
-            const id = item.id || item.name;
-            const name = item.name;
             const option = document.createElement('option');
-            option.value = id;
-            option.textContent = name;
-            if (id === currentValue) {
-                option.selected = true;
-            }
+            option.value = item.id;   // 👈 always use ID
+            option.textContent = item.name;
+            if (item.id === currentValue) option.selected = true;
             select.appendChild(option);
         });
     }
@@ -481,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =======================
 
     // Insert a Loadout Code field dynamically
+    // Insert Loadout Code field
     (function insertLoadoutCodeField() {
         const container = document.querySelector('.container') || document.body;
         const wrapper = document.createElement('div');
@@ -502,34 +502,21 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.appendChild(document.createTextNode(' '));
         wrapper.appendChild(input);
 
-        const children = container.children;
-        const insertIndex = Math.floor(children.length / 2);
-        if (children.length > 0 && children[insertIndex]) {
-            container.insertBefore(wrapper, children[insertIndex]);
-        } else {
-            container.appendChild(wrapper);
-        }
+        container.appendChild(wrapper);
 
-        // Wire change listener
         input.addEventListener('change', (e) => {
             populateFromCode(e.target.value.trim());
         });
     })();
 
+    // Keep code updated on any change
+    document.querySelector('.container').addEventListener('change', updateLoadoutCode);
+
+
     // Helpers: safe parsing and packing
     function toByte(valStr) {
-        // Two-digit (00-99) or single-digit (0-9) values go into one byte
         const n = parseInt(valStr || "0", 10);
-        if (isNaN(n)) return 0;
-        return Math.max(0, Math.min(255, n));
-    }
-    function toTwoBytes(valStr) {
-        // Three-digit (000-999) augment values packed as two bytes (big-endian)
-        const n = parseInt(valStr || "0", 10);
-        const clamped = Math.max(0, Math.min(999, isNaN(n) ? 0 : n));
-        const hi = (clamped >> 8) & 0xFF;   // high byte
-        const lo = clamped & 0xFF;          // low byte
-        return [hi, lo];
+        return isNaN(n) ? 0 : Math.max(0, Math.min(255, n));
     }
     function fromTwoBytes(hi, lo) {
         return ((hi & 0xFF) << 8) + (lo & 0xFF);
@@ -537,113 +524,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Build compact bytes from current selections
     function buildLoadoutBytes() {
-        // Shell: 1 byte
         const shell = toByte(document.getElementById('shell-select')?.value);
-
-        // Weapons: 3 bytes (each two-digit id)
         const backup = toByte(document.getElementById('backup-weapon-select')?.value);
         const secondary = toByte(document.getElementById('secondary-weapon-select')?.value);
         const primary = toByte(document.getElementById('primary-weapon-select')?.value);
 
-        // Sidearm attachments (6 × 1 byte)
         const sidearmFields = [
             document.getElementById('secondary-optic-select')?.value,
             document.getElementById('secondary-ammo-select')?.value,
             ...SECONDARY_MOD_SELECTS.map(id => document.getElementById(id)?.value)
         ].map(toByte);
 
-        // Primary attachments (6 × 1 byte)
         const primaryFields = [
             document.getElementById('primary-optic-select')?.value,
             document.getElementById('primary-ammo-select')?.value,
             ...PRIMARY_MOD_SELECTS.map(id => document.getElementById(id)?.value)
         ].map(toByte);
 
-        // Augments (4 × 2 bytes)
-        const augmentPairs = AUGMENT_SELECTS
-            .map(id => toTwoBytes(document.getElementById(id)?.value))
-            .flat();
+        const augmentBytes = AUGMENT_SELECTS.map(id => toByte(document.getElementById(id)?.value));
+        const devices = DEVICE_SELECTS.map(id => toByte(document.getElementById(id)?.value));
 
-        // Devices (2 × 1 byte)
-        const devices = DEVICE_SELECTS
-            .map(id => toByte(document.getElementById(id)?.value));
-
-        // Total bytes: 1 + 3 + 6 + 6 + 8 + 2 = 26
         const bytes = [
             shell,
             backup, secondary, primary,
             ...sidearmFields,
             ...primaryFields,
-            ...augmentPairs,
+            ...augmentBytes,
             ...devices
         ];
-        return new Uint8Array(bytes);
+        return new Uint8Array(bytes); // 24 bytes total
     }
 
     // Convert bytes <-> Base64 safely
     function bytesToBase64(bytes) {
         let binary = '';
-        for (let i = 0; i < bytes.length; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
         return btoa(binary);
     }
+
     function base64ToBytes(b64) {
         try {
             const binary = atob(b64);
             const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
             return bytes;
-        } catch (e) {
+        } catch {
             alert("Invalid Loadout Code");
             return null;
         }
     }
+
 
     // Update the Loadout Code input value
     function updateLoadoutCode() {
         const field = document.getElementById('loadout-code');
         if (!field) return;
         const bytes = buildLoadoutBytes();
-        field.value = bytesToBase64(bytes);
+        field.value = bytesToBase64(bytes); // always 32 chars
     }
 
-    // Populate UI from a code (decode bytes back to ids)
     function populateFromCode(b64) {
         const bytes = base64ToBytes(b64);
-        if (!bytes) return;
-
-        // Expect exactly 26 bytes
-        if (bytes.length !== 26) {
-            alert("Loadout Code has an unexpected length.");
+        if (!bytes || bytes.length !== 24) {
+            alert("Invalid Loadout Code length");
             return;
         }
-
         let i = 0;
         const shell = bytes[i++];
-
         const backup = bytes[i++];
         const secondary = bytes[i++];
         const primary = bytes[i++];
-
         const sidearmAttachments = bytes.slice(i, i+6); i += 6;
         const primaryAttachments = bytes.slice(i, i+6); i += 6;
-
-        const augments = [];
-        for (let a = 0; a < 4; a++) {
-            const hi = bytes[i++], lo = bytes[i++];
-            augments.push(fromTwoBytes(hi, lo));
-        }
-
+        const augments = bytes.slice(i, i+4); i += 4;
         const devices = bytes.slice(i, i+2); i += 2;
 
-        // Set values (convert numbers back to strings)
         const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = String(v); };
 
         setVal('shell-select', shell);
-
         setVal('backup-weapon-select', backup);
         setVal('secondary-weapon-select', secondary);
         setVal('primary-weapon-select', primary);
@@ -662,6 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyLoadoutRestrictions();
         updateLoadoutCode();
     }
+
 
     // Also update code when anything in the container changes
     (function mirrorChangesToCode() {
