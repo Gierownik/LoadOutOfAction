@@ -1,67 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- GLOBAL CONSTANTS & DATA STORAGE ---
-    
-    // IDs for logic checks (Values come from the id.json file)
-    const AUGMENT_TECHNICIAN = "23";      // Unlocks technician-only attachments
-    const AUGMENT_VERSATILE = "61";       // Allows duplicate devices, but NOT weapons (new logic)
-    const AUGMENT_HEAVY_WEAPONS = "19";   // Renames backup slot and allows heavy weapons
-    const AUGMENT_EXPERIMENTAL = "17";    // Required for experimental devices
-    const AUGMENT_NEUROHACKER = "68";     // Placeholder ID for Neurohacker (assumed next ID)
-    const AUGMENT_PROFESSIONAL = "50"; // replace with actual ID
-    const AUGMENT_STUDIED = "76";      // replace with actual ID
+    const AUGMENT_TECHNICIAN = "23";
+    const AUGMENT_VERSATILE = "61";
+    const AUGMENT_HEAVY_WEAPONS = "19";
+    const AUGMENT_EXPERIMENTAL = "17";
+    const AUGMENT_NEUROHACKER = "68";
+    const AUGMENT_PROFESSIONAL = "50";
+    const AUGMENT_STUDIED = "76";
 
-    
-    // Device Names requiring Neurohacker (since IDs are unavailable)
     const DEVICE_LOCKDOWN_NAME = "Lockdown";
     const DEVICE_CASCADE_NAME = "Cascade";
     const DEVICE_PATHOGEN_NAME = "Pathogen";
     
-    let allAmmoData = {};       // Stores all Ammo data fetched from JSON
-    let allWeaponsData = {};    // Stores Weapon ID: Name map (from id.json)
-    let allDevicesData = [];    // Stores array of device objects (from devices.json)
-    let allAttachmentsData = [];// Stores array of attachment objects (from attachments.json)
-    let idDataGlobal = {};      // Raw id.json data for id -> name and name -> id lookups
-    let reverseIdMaps = {};     // Reverse maps: category -> { id: name }
+    let allAmmoData = {};
+    let allWeaponsData = {};
+    let allDevicesData = [];
+    let allAttachmentsData = [];
+    let idDataGlobal = {};
+    let reverseIdMaps = {};
 
-    // Hardcoded weapon category map (ID to Type)
-    // NOTE: This uses placeholder IDs. The complete list of weapon IDs must be present in data.Weapons from id.json.
     const WEAPON_CATEGORIES = {
         "2":"secondary", // Major
-"3":"secondary", // Deckard
-"7":"primary", // Icarus
-"6":"primary", // Master-Key
-"5":"secondary", // Cerberus
-"9":"primary", // Vigil
-"1":"backup", // TTK
-"8":"primary", // Custodian
-"4":"secondary", // Geist
-"10":"primary", // Inhibitor
-"11":"primary", // Sentinel
-"12":"primary", // Warrant
-"13":"primary", // Helix
-"14":"primary", // Nexus
-"15":"heavy", // Umibozu
-"16":"heavy", // Blackout
-"17":"backup", // Akanami
-"18":"primary", // Typhon
-"19":"secondary", // Omen
-"20":"heavy", // Hole-Punch
-"21":"secondary", // Double-Tap
-"22":"backup", // Dusters
-"23":"backup" // Fists
+        "3":"secondary", // Deckard
+        "7":"primary", // Icarus
+        "6":"primary", // Master-Key
+        "5":"secondary", // Cerberus
+        "9":"primary", // Vigil
+        "1":"backup", // TTK
+        "8":"primary", // Custodian
+        "4":"secondary", // Geist
+        "10":"primary", // Inhibitor
+        "11":"primary", // Sentinel
+        "12":"primary", // Warrant
+        "13":"primary", // Helix
+        "14":"primary", // Nexus
+        "15":"heavy", // Umibozu
+        "16":"heavy", // Blackout
+        "17":"backup", // Akanami
+        "18":"primary", // Typhon
+        "19":"secondary", // Omen
+        "20":"heavy", // Hole-Punch
+        "21":"secondary", // Double-Tap
+        "22":"backup", // Dusters
+        "23":"backup" // Fists
 
     };
 
-    // Lists of element IDs for easy iteration
     const AUGMENT_SELECTS = ['augment-1-select', 'augment-2-select', 'augment-3-select', 'augment-4-select'];
     const DEVICE_SELECTS = ['device-1-select', 'device-2-select'];
     const WEAPON_SELECTS = ['backup-weapon-select', 'secondary-weapon-select', 'primary-weapon-select'];
     
     const SECONDARY_MOD_SELECTS = ['secondary-mod-1-select', 'secondary-mod-2-select', 'secondary-mod-3-select', 'secondary-mod-4-select'];
     const PRIMARY_MOD_SELECTS = ['primary-mod-1-select', 'primary-mod-2-select', 'primary-mod-3-select', 'primary-mod-4-select'];
-    
-    // Global state to hold currently selected items
     let loadoutState = {
         augments: [],
         devices: [],
@@ -80,11 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isNeurohacker: false
     };
     
-    // --- UTILITY FUNCTIONS ---
-
-    /**
-     * Generic function to populate a select element.
-     */
     function populateSelect(selectId, dataMap) {
         const select = document.getElementById(selectId);
         if (!select) return;
@@ -93,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         select.innerHTML = '<option value=""> - </option>';
 
         const items = (Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name })))
-    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+    .sort((a, b) => a.name.localeCompare(b.name));
 
 
         items.forEach(item => {
@@ -109,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // New helper function to populate weapon selects with category filtering and slot renaming
     function populateWeaponSelect(selectId, allWeaponsMap, weaponCategories, isHeavyWeaponsAugment) {
         const select = document.getElementById(selectId);
         if (!select) return;
@@ -120,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let allowedCategories = [];
         let slotName = '';
 
-        // Base slot defaults
         if (selectId === 'secondary-weapon-select') {
             allowedCategories = ['secondary'];
             slotName = 'Secondary';
@@ -136,23 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Augment rules
-        // Versatile: primary & secondary slots can equip backup, secondary, primary
         if (loadoutState.isVersatile && (selectId === 'primary-weapon-select' || selectId === 'secondary-weapon-select')) {
             allowedCategories = ['primary', 'secondary', 'backup'];
         }
 
-        // Studied removes primary and secondary everywhere (including versatile-expanded lists)
         if (loadoutState.isStudied) {
             allowedCategories = allowedCategories.filter(c => c !== 'primary' && c !== 'secondary');
         } else {
-            // Professional removes primary everywhere (except backup which doesn't have primary anyway)
             if (loadoutState.isProfessional) {
                 allowedCategories = allowedCategories.filter(c => c !== 'primary');
             }
         }
 
-        // Populate options
         for (const [id, name] of Object.entries(allWeaponsMap)) {
             const category = weaponCategories[id];
             if (category && allowedCategories.includes(category)) {
@@ -164,14 +142,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // If prior selection is no longer allowed, clear it
         if (currentValue && !select.querySelector(`option[value="${currentValue}"]`)) {
             select.value = "";
         }
     }
 
-    // --- Loadout Code Helpers (encode/decode to base64) ---
-    // Mapping from select IDs to id.json categories used for lookups
     const SELECT_TO_CATEGORY = {
         'shell-select': 'Shells',
         'backup-weapon-select': 'Weapons',
@@ -197,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'device-2-select': 'Devices'
     };
 
-    // Field order and widths (decimal digits) used when encoding/decoding
     const ENCODE_FIELDS = [
         { id: 'shell-select', width: 2 },
         { id: 'backup-weapon-select', width: 3 },
@@ -235,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
             bytes.push(Number(b & 0xFFn));
             b >>= 8n;
         }
-        // bytes are little-endian; convert to big-endian string
         let binary = '';
         for (let i = bytes.length - 1; i >= 0; i--) binary += String.fromCharCode(bytes[i]);
         return btoa(binary);
@@ -252,10 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateLoadoutCode() {
-        // require idDataGlobal to be available
         if (!idDataGlobal || Object.keys(idDataGlobal).length === 0) return '';
 
-        // Build numeric string by iterating ENCODE_FIELDS and reading select values
         let numeric = '';
         const debugParts = [];
         ENCODE_FIELDS.forEach(field => {
@@ -266,15 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const val = select.value || '';
                 const category = SELECT_TO_CATEGORY[field.id];
 
-                // If the selected option is already an id (digits), use that.
                 if (/^\d+$/.test(val)) raw = val;
                 else if (category && idDataGlobal[category]) {
-                    // Try to find id by name in idDataGlobal (name -> id mapping)
                     const mapping = idDataGlobal[category];
-                    // mapping might be an object name->id
                     if (mapping[val]) raw = String(mapping[val]);
                     else {
-                        // Maybe val equals a name but case differs: try to find key by value
                         const found = Object.entries(mapping).find(([name, id]) => name === val || String(id) === val);
                         raw = found ? String(found[1]) : '';
                     }
@@ -286,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             debugParts.push({ field: field.id, value: select ? select.value : null, resolvedId: raw || null, padded: raw.padStart(field.width, '0') });
         });
 
-        // Debug log the parts and numeric string so user can see what's encoded
         try {
             console.groupCollapsed('Loadout code generation');
             console.log('Resolved parts:', debugParts);
@@ -294,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.groupEnd();
         } catch (e) {}
 
-        // Convert numeric string to BigInt and then to base64
         const big = numeric ? BigInt(numeric) : 0n;
         const b64 = bigintToBase64(big);
         return b64;
@@ -307,11 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const big = base64ToBigInt(b64);
         let numeric = big.toString();
 
-        // numeric may have lost leading zeros, so we need to left-pad to the total length
         const totalWidth = ENCODE_FIELDS.reduce((s, f) => s + f.width, 0);
         numeric = numeric.padStart(totalWidth, '0');
 
-        // Slice numeric according to fields
         let idx = 0;
         const decoded = {};
         ENCODE_FIELDS.forEach(field => {
@@ -321,16 +284,13 @@ document.addEventListener('DOMContentLoaded', () => {
             decoded[field.id] = value;
         });
 
-        // Set values for selects. First set non-attachment selects (weapons, shell, augments)
         const setSelectValue = (selectId, idValue) => {
             const select = document.getElementById(selectId);
             if (!select) return;
-            // If there is an option with value == idValue -> set it
             if (idValue && select.querySelector(`option[value="${idValue}"]`)) {
                 select.value = idValue;
                 return;
             }
-            // Otherwise try to map id -> name using reverseIdMaps
             const category = SELECT_TO_CATEGORY[selectId];
             if (category && reverseIdMaps[category] && reverseIdMaps[category][idValue]) {
                 const name = reverseIdMaps[category][idValue];
@@ -343,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
             select.value = '';
         };
 
-        // Set weapons + shell + augments + devices (devices use names in this app)
         setSelectValue('shell-select', decoded['shell-select']);
         setSelectValue('backup-weapon-select', decoded['backup-weapon-select']);
         setSelectValue('primary-weapon-select', decoded['primary-weapon-select']);
@@ -353,16 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setSelectValue('augment-2-select', decoded['augment-2-select']);
         setSelectValue('augment-3-select', decoded['augment-3-select']);
         setSelectValue('augment-4-select', decoded['augment-4-select']);
-
-        // Devices may use keys that are names in the device options; reverseIdMaps['Devices'] maps id->name
+        
         setSelectValue('device-1-select', decoded['device-1-select']);
         setSelectValue('device-2-select', decoded['device-2-select']);
 
-        // Now update state and restrictions so attachment selects are repopulated correctly
         updateLoadoutState();
         applyLoadoutRestrictions();
 
-        // Now set attachments (optic/ammo/mods) which typically have option values as names
         const setAttachmentById = (selectId, idValue) => {
             const select = document.getElementById(selectId);
             if (!select) return;
