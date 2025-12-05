@@ -407,38 +407,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentValue = select.value;
         select.innerHTML = '<option value="">--- Select Attachment ---</option>';
 
+        // Only show attachments of the correct type
         const relevantAttachments = allAttachmentsData.filter(a => a.type === attachmentType);
 
+        // If no weapon is selected, show no options
         if (!weaponName) return;
 
         relevantAttachments.forEach(attachment => {
+            const requiresTechnician = attachment.technician === "true";
+            const isCompatible = attachment.compatibility.includes(weaponName);
+
+            // ------------------------------
+            //  HARD FILTER (MUST KEEP!)
+            //  incompatible attachments must not appear at all
+            // ------------------------------
+            if (!isCompatible) {
+                return; 
+            }
+
+            // Only now create the option (compatible only)
             const option = document.createElement('option');
             option.value = attachment.name;
             option.textContent = attachment.name;
 
-            const requiresTechnician = attachment.technician === "true";
-            const isCompatible = attachment.compatibility.includes(weaponName);
-
             let shouldDisable = false;
             let restrictionReason = '';
 
-            // ---- 1. Technician requirement (same style as Experimental) ----
+            // ------------------------------
+            // Technician disabling (device-style)
+            // ------------------------------
             if (requiresTechnician && !loadoutState.isTechnician) {
                 shouldDisable = true;
                 restrictionReason = 'Requires the Technician Augment.';
             }
 
-            // ---- 2. Weapon compatibility ----
-            if (!isCompatible) {
-                shouldDisable = true;
-                restrictionReason = 'Not compatible with ' + weaponName + '.';
-            }
-
-            // ---- Apply disable + tooltip like the device code ----
+            // Apply disable + tooltip
             option.disabled = shouldDisable;
             option.title = shouldDisable ? restrictionReason : '';
 
-            // keep selected if still valid
+            // Keep current selection if valid
             if (attachment.name === currentValue) {
                 option.selected = true;
 
@@ -452,11 +459,12 @@ document.addEventListener('DOMContentLoaded', () => {
             select.appendChild(option);
         });
 
-        // If previous selection is now invalid → clear it
+        // Clear invalid selection after filtering
         if (currentValue && !select.querySelector(`option[value="${currentValue}"]`)) {
             select.value = "";
         }
     }
+
 
 
     // --- DATA LOADING & POPULATION ---
