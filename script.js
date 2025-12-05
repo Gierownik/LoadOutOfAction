@@ -463,13 +463,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (shouldShow) {
-                // Assuming attachment name is unique and can be used as the value.
+                // Create option. Prefer using the numeric id (from id.json) as the option value
                 const option = document.createElement('option');
-                option.value = attachment.name;
+                // Determine category name as used in idDataGlobal (Optic->Optics, Ammo->Ammo, Mod->Mods)
+                let category = attachmentType;
+                if (attachmentType === 'Optic') category = 'Optics';
+                else if (attachmentType === 'Mod') category = 'Mods';
+
+                // Try to find a numeric id for this attachment name
+                let resolvedId = null;
+                try {
+                    if (idDataGlobal && idDataGlobal[category]) {
+                        // Direct lookup by exact name
+                        if (idDataGlobal[category][attachment.name]) resolvedId = String(idDataGlobal[category][attachment.name]);
+                        else {
+                            // Case-insensitive match fallback
+                            const found = Object.entries(idDataGlobal[category]).find(([n, i]) => n.toLowerCase() === (attachment.name || '').toLowerCase());
+                            if (found) resolvedId = String(found[1]);
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+
+                // Set option value to the numeric id when available; otherwise fall back to the attachment name
+                option.value = resolvedId || attachment.name;
                 option.textContent = attachment.name;
-                if (attachment.name === currentValue) {
+                // Keep a data-name to preserve original name for matching/debug
+                option.dataset.name = attachment.name;
+                // Mark dataset.tech if this attachment requires Technician
+                if (isTechnicianRequired) option.dataset.tech = '1'; else delete option.dataset.tech;
+
+                // Preserve previous selection if names/ids match
+                if ((resolvedId && resolvedId === currentValue) || (!resolvedId && attachment.name === currentValue) || (attachment.name === currentValue)) {
                     option.selected = true;
                 }
+
                 select.appendChild(option);
             }
         });
