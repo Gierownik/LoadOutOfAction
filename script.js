@@ -590,11 +590,39 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate attachments (temporarily populate with all, filtering will happen in applyLoadoutRestrictions)
         populateSelect('secondary-optic-select', data.Optics);
         populateSelect('secondary-ammo-select', data.Ammo);
+        // Tag ammo options with a data attribute if they are technician-only
+        markTechnicianAmmoOptions();
         SECONDARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
 
         populateSelect('primary-optic-select', data.Optics);
         populateSelect('primary-ammo-select', data.Ammo);
+        // Tag ammo options again for primary
+        markTechnicianAmmoOptions();
         PRIMARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
+        
+        // Helper: mark ammo options with dataset.tech='1' when they match computed technician-only IDs
+        function markTechnicianAmmoOptions() {
+            try {
+                const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
+                ammoSelectIds.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    Array.from(sel.options).forEach(opt => {
+                        if (!opt.value) return;
+                        const val = String(opt.value).trim();
+                        const name = (opt.textContent || '').trim();
+                        let mark = false;
+                        if (TECHNICIAN_ONLY_AMMO_IDS.includes(val)) mark = true;
+                        else if (reverseIdMaps['Ammo']) {
+                            for (const id of TECHNICIAN_ONLY_AMMO_IDS) {
+                                if (reverseIdMaps['Ammo'][id] === name) { mark = true; break; }
+                            }
+                        }
+                        if (mark) opt.dataset.tech = '1'; else delete opt.dataset.tech;
+                    });
+                });
+            } catch (e) { console.warn('markTechnicianAmmoOptions failed', e); }
+        }
         
         // --- Add Event Listeners ---
         const allSelects = document.querySelectorAll('.container select');
@@ -905,13 +933,12 @@ AUGMENT_SELECTS.forEach(selectId => {
                     const optionName = (opt.textContent || '').trim();
                     const optionValue = (opt.value || '').trim();
                     
-                    // Check if this ammo is in the technician-only list by:
-                    // 1) Checking if opt.value matches a technician-only ID
-                    // 2) Checking if the option's text matches a technician-only ammo name (via reverseIdMaps)
-                    if (TECHNICIAN_ONLY_AMMO_IDS.includes(optionValue)) {
+                    // Prefer explicit data tag set during population; fallback to id/name checks
+                    if (opt.dataset && opt.dataset.tech === '1') {
+                        isTechnicianOnly = true;
+                    } else if (TECHNICIAN_ONLY_AMMO_IDS.includes(optionValue)) {
                         isTechnicianOnly = true;
                     } else if (reverseIdMaps['Ammo']) {
-                        // See if any technician-only ammo ID maps to this option's text
                         for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
                             if (reverseIdMaps['Ammo'][ammoid] === optionName) {
                                 isTechnicianOnly = true;
