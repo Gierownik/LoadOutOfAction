@@ -895,6 +895,7 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
         // Technician-only ammo: grey out options unless Technician augment equipped
         function updateTechnicianAmmoAvailability() {
             const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
+            console.log('updateTechnicianAmmoAvailability called. reverseIdMaps:', reverseIdMaps, 'TECHNICIAN_ONLY_AMMO_IDS:', TECHNICIAN_ONLY_AMMO_IDS);
             ammoSelectIds.forEach(selId => {
                 const sel = document.getElementById(selId);
                 if (!sel) return;
@@ -908,6 +909,7 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
                         const optionName = (opt.textContent || '').trim();
                         for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
                             if (reverseIdMaps['Ammo'][ammoid] === optionName) {
+                                console.log(`Matched technician-only ammo: ${optionName} (id ${ammoid})`);
                                 isTechnicianOnly = true;
                                 break;
                             }
