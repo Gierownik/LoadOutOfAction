@@ -774,6 +774,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
+     * Updates technician-only ammo availability (grey/disable options).
+     */
+    function updateTechnicianAmmoAvailability() {
+        const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
+        ammoSelectIds.forEach(selId => {
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            Array.from(sel.options).forEach(opt => {
+                if (!opt.value) return; // skip placeholder
+                
+                let isTechnicianOnly = false;
+                const optionName = (opt.textContent || '').trim();
+                const optionValue = (opt.value || '').trim();
+                
+                // Prefer explicit data tag set during population; fallback to id/name checks
+                if (opt.dataset && opt.dataset.tech === '1') {
+                    isTechnicianOnly = true;
+                } else if (TECHNICIAN_ONLY_AMMO_IDS.includes(optionValue)) {
+                    isTechnicianOnly = true;
+                } else if (reverseIdMaps['Ammo']) {
+                    for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
+                        if (reverseIdMaps['Ammo'][ammoid] === optionName) {
+                            isTechnicianOnly = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (isTechnicianOnly) {
+                    const shouldDisable = !loadoutState.isTechnician;
+                    // Don't disable the currently selected option to avoid flicker
+                    if (opt.value !== sel.value) {
+                        opt.disabled = shouldDisable;
+                        opt.classList.toggle('technician-only-restricted', shouldDisable);
+                    }
+                    opt.title = shouldDisable ? 'Requires the Technician augment.' : '';
+                }
+            });
+        });
+    }
+    
+    /**
      * Applies all loadout restrictions.
      */
     function applyLoadoutRestrictions() {
@@ -959,54 +1001,7 @@ AUGMENT_SELECTS.forEach(selectId => {
         applyModRestrictions(PRIMARY_MOD_SELECTS);
 
         // Technician-only ammo: grey out options unless Technician augment equipped
-        function updateTechnicianAmmoAvailability() {
-            const ammoSelectIds = ['secondary-ammo-select', 'primary-ammo-select'];
-            ammoSelectIds.forEach(selId => {
-                const sel = document.getElementById(selId);
-                if (!sel) return;
-                Array.from(sel.options).forEach(opt => {
-                    if (!opt.value) return; // skip placeholder
-                    
-                    let isTechnicianOnly = false;
-                    const optionName = (opt.textContent || '').trim();
-                    const optionValue = (opt.value || '').trim();
-                    
-                    // Prefer explicit data tag set during population; fallback to id/name checks
-                    if (opt.dataset && opt.dataset.tech === '1') {
-                        isTechnicianOnly = true;
-                    } else if (TECHNICIAN_ONLY_AMMO_IDS.includes(optionValue)) {
-                        isTechnicianOnly = true;
-                    } else if (reverseIdMaps['Ammo']) {
-                        for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
-                            if (reverseIdMaps['Ammo'][ammoid] === optionName) {
-                                isTechnicianOnly = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (isTechnicianOnly) {
-                        const shouldDisable = !loadoutState.isTechnician;
-                        // Don't disable the currently selected option to avoid flicker
-                        if (opt.value !== sel.value) {
-                            opt.disabled = shouldDisable;
-                            opt.classList.toggle('technician-only-restricted', shouldDisable);
-                        }
-                        opt.title = shouldDisable ? 'Requires the Technician augment.' : '';
-                    }
-                    // debug each option evaluation
-                    try {
-                        console.debug('Ammo option check', { select: selId, optionValue: optionValue, optionName: optionName, isTechnicianOnly });
-                    } catch (e) {}
-                });
-            });
-        }
-
-        // Run availability check now
-        try {
-            updateTechnicianAmmoAvailability();
-        } catch (e) { console.warn('updateTechnicianAmmoAvailability invocation failed', e); }
-
+        updateTechnicianAmmoAvailability();
 
     }
     
