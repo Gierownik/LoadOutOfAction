@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!select) return;
 
         const currentValue = select.value;
-        select.innerHTML = '<option value="">--- Select ---</option>';
+        select.innerHTML = '<option value=""> - </option>';
 
         const items = (Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name })))
     .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!select) return;
 
         const currentValue = select.value;
-        select.innerHTML = '<option value="">--- Select Weapon ---</option>';
+        select.innerHTML = '<option value=""> - </option>';
 
         let allowedCategories = [];
         let slotName = '';
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!select) return;
 
         const currentValue = select.value;
-        select.innerHTML = '<option value="">--- Select Attachment ---</option>';
+        select.innerHTML = '<option value=""> - </option>';
 
         // Only show attachments of the correct type
         const relevantAttachments = allAttachmentsData.filter(a => a.type === attachmentType);
