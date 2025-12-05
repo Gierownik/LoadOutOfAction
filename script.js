@@ -729,6 +729,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Run once on startup to ensure initial state and restrictions are applied
         updateLoadoutState();
         applyLoadoutRestrictions();
+
+        // Start continuous technician ammo availability check loop after function is defined
+        if (technicianAmmoCheckInterval) clearInterval(technicianAmmoCheckInterval);
+        technicianAmmoCheckInterval = setInterval(() => {
+            try {
+                updateTechnicianAmmoAvailability();
+            } catch (e) { console.warn('Loop: updateTechnicianAmmoAvailability failed', e); }
+        }, 100);
     }
 
     // --- LOGIC & RESTRICTIONS ---
@@ -1014,12 +1022,4 @@ AUGMENT_SELECTS.forEach(selectId => {
     
     // --- INITIALIZATION ---
     fetchAndPopulateData();
-
-    // Start continuous technician ammo availability check loop
-    if (technicianAmmoCheckInterval) clearInterval(technicianAmmoCheckInterval);
-    technicianAmmoCheckInterval = setInterval(() => {
-        try {
-            updateTechnicianAmmoAvailability();
-        } catch (e) { console.warn('Loop: updateTechnicianAmmoAvailability failed', e); }
-    }, 100);
 });
