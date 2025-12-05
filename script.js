@@ -1132,7 +1132,7 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
     // Wait a moment for data to load, then check for URL loadout parameter
     setTimeout(() => {
         loadLoadoutFromUrl();
-    }, 150);
+    }, 375);
 
     // Update URL whenever the loadout changes
     document.addEventListener('change', (e) => {
