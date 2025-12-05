@@ -900,7 +900,21 @@ applyModRestrictions(PRIMARY_MOD_SELECTS);
                 if (!sel) return;
                 Array.from(sel.options).forEach(opt => {
                     if (!opt.value) return; // skip placeholder
-                    if (TECHNICIAN_ONLY_AMMO_IDS.includes(String(opt.value))) {
+                    // Check if this option's name (textContent) corresponds to a technician-only ammo ID
+                    // by looking it up in reverseIdMaps['Ammo'] (id -> name)
+                    let isTechnicianOnly = false;
+                    if (reverseIdMaps['Ammo']) {
+                        // See if any technician-only ammo ID maps to this option's text
+                        const optionName = (opt.textContent || '').trim();
+                        for (const ammoid of TECHNICIAN_ONLY_AMMO_IDS) {
+                            if (reverseIdMaps['Ammo'][ammoid] === optionName) {
+                                isTechnicianOnly = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isTechnicianOnly) {
                         const shouldDisable = !loadoutState.isTechnician;
                         // Don't disable the currently selected option to avoid flicker
                         if (opt.value !== sel.value) {
