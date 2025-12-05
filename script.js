@@ -608,6 +608,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const codeBtn = document.getElementById('loadout-code-apply-btn');
         const codeOut = document.getElementById('loadout-code-output');
 
+        // Add randomize button
+        const randomizeBtn = document.createElement('button');
+        randomizeBtn.id = 'randomize-loadout-btn';
+        randomizeBtn.textContent = 'Randomize';
+        randomizeBtn.style.marginLeft = '8px';
+        codeContainer.appendChild(randomizeBtn);
+
+        randomizeBtn.addEventListener('click', randomizeLoadout);
+
         // Wire interactions (idempotent wiring is fine)
         if (codeBtn && codeInput) {
             codeBtn.addEventListener('click', () => {
@@ -860,6 +869,191 @@ applyModRestrictions(SECONDARY_MOD_SELECTS);
 applyModRestrictions(PRIMARY_MOD_SELECTS);
 
 
+    }
+    
+    /**
+     * Randomizes the entire loadout while respecting all restrictions.
+     * Each field has a chance to be empty.
+     */
+    function randomizeLoadout() {
+        // Helper to randomly choose an empty slot or a valid option
+        function getRandomOption(selectId, allowEmpty = true) {
+            const select = document.getElementById(selectId);
+            if (!select) return null;
+
+            const emptyChance = allowEmpty ? 0.2 : 0; // 20% chance to leave empty if allowed
+            if (Math.random() < emptyChance) {
+                return ''; // Empty slot
+            }
+
+            // Get all non-empty options
+            const validOptions = Array.from(select.options)
+                .filter(opt => opt.value); // Skip placeholder option
+
+            if (validOptions.length === 0) return '';
+            
+            // Pick random valid option
+            return validOptions[Math.floor(Math.random() * validOptions.length)].value;
+        }
+
+        // 1. Randomize Augments (no duplicates, high chance of empty)
+        const augmentOptions = document.getElementById('augment-1-select');
+        if (augmentOptions) {
+            const validAugments = Array.from(augmentOptions.options)
+                .filter(opt => opt.value)
+                .map(opt => opt.value);
+
+            // Shuffle and pick random number (0-4) of unique augments
+            const numAugments = Math.floor(Math.random() * 5); // 0 to 4
+            const shuffled = [...validAugments].sort(() => Math.random() - 0.5);
+            const selectedAugments = shuffled.slice(0, numAugments);
+
+            AUGMENT_SELECTS.forEach((selectId, idx) => {
+                const select = document.getElementById(selectId);
+                select.value = selectedAugments[idx] || '';
+            });
+        }
+
+        // Update state so we know what augments are active
+        updateLoadoutState();
+
+        // 2. Randomize Shells
+        document.getElementById('shell-select').value = getRandomOption('shell-select', true) || '';
+
+        // 3. Randomize Weapons (no duplicates, high chance of empty)
+        const weaponOptions = document.getElementById('backup-weapon-select');
+        if (weaponOptions) {
+            const validWeapons = Array.from(weaponOptions.options)
+                .filter(opt => opt.value)
+                .map(opt => opt.value);
+
+            // Pick 0-3 unique weapons for the three slots
+            const numWeapons = Math.floor(Math.random() * 4); // 0 to 3
+            const shuffled = [...validWeapons].sort(() => Math.random() - 0.5);
+            const selectedWeapons = shuffled.slice(0, numWeapons);
+
+            const weaponSlots = ['backup-weapon-select', 'secondary-weapon-select', 'primary-weapon-select'];
+            weaponSlots.forEach((selectId, idx) => {
+                const select = document.getElementById(selectId);
+                select.value = selectedWeapons[idx] || '';
+            });
+        }
+
+        // Update state to know what weapons are selected
+        updateLoadoutState();
+
+        // 4. Randomize Devices (respect Neurohacker, Experimental, Versatile, Studied)
+        const deviceOptions = document.getElementById('device-1-select');
+        if (deviceOptions) {
+            const validDevices = Array.from(deviceOptions.options)
+                .filter(opt => opt.value)
+                .map(opt => opt.value);
+
+            // Get allowed devices based on augments
+            const allowedDevices = validDevices.filter(deviceId => {
+                const device = allDevicesData.find(d => d.id === deviceId || d.name === deviceId);
+                if (!device) return true; // Safety: allow if not found
+
+                const deviceName = device.name || device.id;
+                const requiresNeurohacker = [DEVICE_LOCKDOWN_NAME, DEVICE_CASCADE_NAME, DEVICE_PATHOGEN_NAME].includes(deviceName);
+                const requiresExperimental = device.experimental === "true";
+
+                if (requiresNeurohacker && !loadoutState.isNeurohacker) return false;
+                if (requiresExperimental && !loadoutState.isExperimental) return false;
+
+                // Studied restriction
+                if (loadoutState.isStudied) {
+                    const allowedStudiedDevices = ["Bolster", "Overcharge", "Shroud", "Reserve Stim"];
+                    if (!allowedStudiedDevices.includes(deviceName)) return false;
+                }
+
+                return true;
+            });
+
+            // Pick 0-2 unique devices
+            const numDevices = Math.floor(Math.random() * 3); // 0 to 2
+            const shuffled = [...allowedDevices].sort(() => Math.random() - 0.5);
+            const selectedDevices = shuffled.slice(0, numDevices);
+
+            const deviceSlots = ['device-1-select', 'device-2-select'];
+            deviceSlots.forEach((selectId, idx) => {
+                const select = document.getElementById(selectId);
+                select.value = selectedDevices[idx] || '';
+            });
+        }
+
+        // Update state to know what devices are selected
+        updateLoadoutState();
+
+        // 5. Randomize Secondary Weapon Attachments
+        const secondaryWeaponId = document.getElementById('secondary-weapon-select').value;
+        if (secondaryWeaponId) {
+            const secondaryWeaponName = allWeaponsData[secondaryWeaponId];
+            
+            // Randomize optic and ammo
+            document.getElementById('secondary-optic-select').value = getRandomOption('secondary-optic-select', true) || '';
+            document.getElementById('secondary-ammo-select').value = getRandomOption('secondary-ammo-select', true) || '';
+
+            // Randomize mods (no duplicates)
+            const modOptions = document.getElementById('secondary-mod-1-select');
+            if (modOptions) {
+                const validMods = Array.from(modOptions.options)
+                    .filter(opt => opt.value)
+                    .map(opt => opt.value);
+
+                // Pick 0-4 unique mods
+                const numMods = Math.floor(Math.random() * 5); // 0 to 4
+                const shuffled = [...validMods].sort(() => Math.random() - 0.5);
+                const selectedMods = shuffled.slice(0, numMods);
+
+                SECONDARY_MOD_SELECTS.forEach((selectId, idx) => {
+                    const select = document.getElementById(selectId);
+                    select.value = selectedMods[idx] || '';
+                });
+            }
+        } else {
+            // No secondary weapon selected, clear attachments
+            document.getElementById('secondary-optic-select').value = '';
+            document.getElementById('secondary-ammo-select').value = '';
+            SECONDARY_MOD_SELECTS.forEach(id => document.getElementById(id).value = '');
+        }
+
+        // 6. Randomize Primary Weapon Attachments
+        const primaryWeaponId = document.getElementById('primary-weapon-select').value;
+        if (primaryWeaponId) {
+            const primaryWeaponName = allWeaponsData[primaryWeaponId];
+            
+            // Randomize optic and ammo
+            document.getElementById('primary-optic-select').value = getRandomOption('primary-optic-select', true) || '';
+            document.getElementById('primary-ammo-select').value = getRandomOption('primary-ammo-select', true) || '';
+
+            // Randomize mods (no duplicates)
+            const modOptions = document.getElementById('primary-mod-1-select');
+            if (modOptions) {
+                const validMods = Array.from(modOptions.options)
+                    .filter(opt => opt.value)
+                    .map(opt => opt.value);
+
+                // Pick 0-4 unique mods
+                const numMods = Math.floor(Math.random() * 5); // 0 to 4
+                const shuffled = [...validMods].sort(() => Math.random() - 0.5);
+                const selectedMods = shuffled.slice(0, numMods);
+
+                PRIMARY_MOD_SELECTS.forEach((selectId, idx) => {
+                    const select = document.getElementById(selectId);
+                    select.value = selectedMods[idx] || '';
+                });
+            }
+        } else {
+            // No primary weapon selected, clear attachments
+            document.getElementById('primary-optic-select').value = '';
+            document.getElementById('primary-ammo-select').value = '';
+            PRIMARY_MOD_SELECTS.forEach(id => document.getElementById(id).value = '');
+        }
+
+        // Final update to enforce all restrictions and update code
+        updateLoadoutState();
+        applyLoadoutRestrictions();
     }
     
     /**
