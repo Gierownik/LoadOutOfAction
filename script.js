@@ -450,7 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. Technician Augment Check
             if (isTechnicianRequired && !loadoutState.isTechnician) {
-                shouldShow = false;
+                option.disabled = true;
+                option.title = true ? 'Requires the Technician Augment.' : '';
                 restrictionReason = 'Requires the Technician Augment.';
             }
             
