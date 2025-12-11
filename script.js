@@ -35,7 +35,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextStat = stats[key] + delta;
 
             if (nextBudget < 0 || nextBudget > 250) return;
-            if (nextStat < 0 || nextStat > 100) return;
+            
+            // Check individual stat bounds: 0–150, but only ONE stat can exceed 100
+            if (nextStat < 0 || nextStat > 150) return;
+            
+            // If trying to go above 100, check if another stat is already above 100
+            if (nextStat > 100) {
+                const otherStatsAbove100 = Object.entries(stats)
+                    .filter(([k]) => k !== key)
+                    .some(([_, v]) => v > 100);
+                if (otherStatsAbove100) return; // Block: another stat is already >100
+            }
 
             statPoints = nextBudget;
             updatePoints();
@@ -899,6 +909,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     select.classList.remove('invalid-selection');
                 }
             });
+        }
+
+        // Disable 4th augment slot if tier < 4
+        const augment4Select = document.getElementById('augment-4-select');
+        if (augment4Select) {
+            if (matrixTier < 4) {
+                augment4Select.disabled = true;
+                augment4Select.title = 'Unlock at Matrix Tier 4 or higher.';
+                if (augment4Select.value) augment4Select.value = '';
+            } else {
+                augment4Select.disabled = false;
+                augment4Select.title = '';
+            }
         }
 
         AUGMENT_SELECTS.forEach(selectId => {
