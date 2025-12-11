@@ -9,53 +9,55 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">Loadout Editor</h1>
+    <div class="main-layout">
+        <div class="matrix-sidebar">
+                <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">:: Matrix Editor</h1>
 
-        <div id="loadout-code-container"
-            style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
-            <input id="loadout-code-input" type="text" placeholder="Input Code"
-                style="flex:1;min-width:240px;padding:6px;" />
-            <button id="loadout-code-apply-btn" style="padding:6px 10px;">Enter</button>
-            <input id="loadout-code-output" type="text" readonly placeholder="Generated code"
-                style="flex:1;min-width:240px;padding:6px;" />
-        </div>
-
-        <div class="row section-header">
-            <h2>:: Matrix</h2>
-        </div>
-        <div class="matrix-container">
-            <div class="node-wrap">
-                <div id="matrix-node">
-                    Upgrades
-                    <span class="focus" id="stat-points">250</span>
-                    <span>Tier <span class="focus" id="matrix-tier">5</span></span>
+            <div class="matrix-container">
+                <div class="node-wrap">
+                    <div id="matrix-node">
+                        Upgrades
+                        <span class="focus" id="stat-points">250</span>
+                        <span>Tier <span class="focus" id="matrix-tier">5</span></span>
+                    </div>
+                    <div class="matrix-arrows">
+                        <button id="tier-up" class="arrow-btn up-btn">▲</button>
+                        <button id="tier-down" class="arrow-btn down-btn">▼</button>
+                    </div>
                 </div>
-                <div class="matrix-arrows">
-                    <button id="tier-up" class="arrow-btn up-btn">▲</button>
-                    <button id="tier-down" class="arrow-btn down-btn">▼</button>
+
+                <div id="matrix-stats">
+                    <button id="bdy-btn" class="stat-btn bdy">
+                        BDY
+                        <span id="bdy-val">0</span>
+                    </button>
+                    <button id="tec-btn" class="stat-btn tec">
+                        TEC
+                        <span id="tec-val">0</span>
+                    </button>
+                    <button id="hwr-btn" class="stat-btn hwr">
+                        HWR
+                        <span id="hwr-val">0</span>
+                    </button>
                 </div>
             </div>
-
-            <div id="matrix-stats">
-                <button id="bdy-btn" class="stat-btn bdy">
-                    BDY
-                    <span id="bdy-val">0</span>
-                </button>
-                <button id="tec-btn" class="stat-btn tec">
-                    TEC
-                    <span id="tec-val">0</span>
-                </button>
-                <button id="hwr-btn" class="stat-btn hwr">
-                    HWR
-                    <span id="hwr-val">0</span>
-                </button>
+            <div class="matrix-container">
+                <span>Matrix Items Unlocked: 9</span>
+                <button id="matrix-reset-btn" class="control-btn bdy"> <span class="darker-text">></span> Reset</button>
             </div>
         </div>
-        <div class="matrix-container">
-            <span>Matrix Items Unlocked: 9</span>
-            <button id="matrix-reset-btn" class="control-btn bdy"> <span class="darker-text">></span> Reset</button>
-        </div>
+
+        <div class="container">
+            <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">:: Loadout Editor</h1>
+
+            <div id="loadout-code-container"
+                style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+                <input id="loadout-code-input" type="text" placeholder="Input Code"
+                    style="flex:1;min-width:240px;padding:6px;" />
+                <button id="loadout-code-apply-btn" style="padding:6px 10px;">Enter</button>
+                <input id="loadout-code-output" type="text" readonly placeholder="Generated code"
+                    style="flex:1;min-width:240px;padding:6px;" />
+            </div>
 
         <div class="grid-container">
 
@@ -179,6 +181,11 @@
             </div>
         </div>
 
+        </div>
+
+        <div class="right-sidebar">
+            <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">:: Stats</h1>
+        </div>
     </div>
 
     <script src="script.js"></script>

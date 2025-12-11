@@ -36,11 +36,38 @@ body {
     margin: 0;
     padding: 20px;
     letter-spacing: 0.1em;
+    min-height: 100vh;
+}
+
+.main-layout {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 40px);
+    margin: 0 auto;
+}
+
+.matrix-sidebar {
+    flex: 0 0 350px;
+    background-color: #1d1d1d;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .container {
-    max-width: 900px;
-    margin: 0 auto;
+    flex: 1;
+    background-color: #1d1d1d;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+.right-sidebar {
+    flex: 0 0 350px;
     background-color: #1d1d1d;
     padding: 30px;
     border-radius: 8px;
