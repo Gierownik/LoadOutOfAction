@@ -323,12 +323,21 @@ select option:first-child {
     color: var(--upgrades);
 }
 
-/* Custom styling for unselectable (disabled) options */
 option:disabled {
     color: rgba(143, 255, 237, 0.3) !important;
-    /* Makes the text gray */
     background-color: hsl(168, 19%, 21%);
-    /* Light background to visually distinguish it */
     font-style: italic;
     cursor: not-allowed;
+}
+
+select:disabled {
+    background-color: hsl(170, 20%, 14%);
+    color: rgba(143, 255, 237, 0.32);
+    border-color: rgba(143, 255, 237, 0.12);
+    opacity: 0.9;
+    cursor: not-allowed;
+}
+
+select:disabled + .disabled-note {
+    display: inline-block;
 }
