@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let allowedSlots = 1;
             if (loadoutState.isSpecialist) allowedSlots += 1;
             if (loadoutState.isSurplus) allowedSlots += 1;
-            if (typeof stats === 'object' && Number(stats.hardware) > 100) allowedSlots += 1;
+            if (typeof stats === 'object' && Number(stats.hardware) > 99) allowedSlots += 1;
 
             // Enable/disable selects based on allowedSlots (keep order of modSelectIds)
             modSelectIds.forEach((selectId, idx) => {
