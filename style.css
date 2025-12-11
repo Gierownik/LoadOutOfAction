@@ -1,10 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
-.orbitron{
-  font-family: "Orbitron", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-  opacity: .9999999;
+
+:root {
+
+    --ui-red: #B35963;
+
+    --bdy: #FC6078;
+    --bdy-bg: #503136;
+
+    --tec: #A6A5F5;
+    --tec-bg: #3C3B4D;
+
+    --hwr: #B1AFB0;
+    --hwr-bg: #4B494A;
+
+    --matrix: #868686;
+    --matrix-bg: #454344;
+
+    --upgrades: #FFCF5C;
+
+    --notchSize: 50em;
+}
+
+.orbitron {
+    font-family: "Orbitron", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    opacity: .9999999;
 }
 
 body {
@@ -56,7 +78,8 @@ h3 {
 }
 
 .left-column {
-    flex: 1.5; /* Give a little more space for labels */
+    flex: 1.5;
+    /* Give a little more space for labels */
 }
 
 .center-column {
@@ -97,10 +120,14 @@ select {
     background-color: hsl(170, 25%, 20%);
     color: rgba(143, 255, 237, 0.85);
 }
+
 select option {
-    color: rgba(143, 255, 237, 0.85) !important; /* Makes the text gray */
-    background-color: hsl(170, 25%, 20%); /* Light background to visually distinguish it */
+    color: rgba(143, 255, 237, 0.85) !important;
+    /* Makes the text gray */
+    background-color: hsl(170, 25%, 20%);
+    /* Light background to visually distinguish it */
 }
+
 select option:first-child {
     color: rgba(143, 255, 237, 0.5) !important;
     opacity: 0.3;
@@ -123,12 +150,159 @@ select option:first-child {
 .section-header h2 {
     margin: 0;
 }
-/* Add this rule to style.css */
+
+.flex {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.matrix-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+    padding-bottom: 1em;
+}
+
+.node-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.matrix-arrows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+.arrow-btn {
+    width: 1.6em;
+    height: 1.6em;
+    font-size: 0.9em;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--matrix);
+    background: var(--matrix-bg);
+    color: var(--matrix);
+}
+
+.arrow-btn:hover {
+    filter: brightness(120%);
+}
+
+.arrow-btn:disabled {
+    opacity: 50%;
+}
+
+.arrow-btn:disabled:hover {
+    filter: brightness(100%);
+}
+
+#tier-input {
+    padding: 8px;
+    border-radius: 0.5px;
+    border: 0.25em solid rgba(143, 255, 237, 0.7);
+    flex-grow: 1;
+    background-color: hsl(170, 25%, 20%);
+    color: rgba(143, 255, 237, 0.85);
+}
+
+.control-btn {
+    border-style: solid;
+    font-family: "Orbitron", sans-serif;
+    width: 6rem;
+    border-radius: 6px 2px 6px 2px;
+}
+
+.darker-text {
+    font-weight: bolder;
+    filter: brightness(80%)
+}
+
+.control-btn:hover {
+    filter: brightness(120%);
+}
+
+#matrix-stats {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+
+#matrix-node {
+    border-style: solid;
+    font-family: "Orbitron", sans-serif;
+    font-size: 1em;
+    width: 5.5rem;
+    height: 5.5rem;
+    font-size: 0.65em;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+    display: inline-flex;
+    border-color: var(--matrix);
+    color: var(--hwr);
+    background-color: var(--matrix-bg)
+}
+
+#stat-points {
+    font-size: 2.7em;
+    font-weight: bolder;
+}
+
+.stat-btn {
+    border-style: solid;
+    font-family: "Orbitron", sans-serif;
+    font-size: 1em;
+    width: 5rem;
+    height: 5rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5em;
+    display: inline-flex;
+    font-weight: bolder;
+}
+
+.stat-btn:hover {
+    filter: brightness(120%);
+}
+
+.bdy {
+    border-color: var(--bdy);
+    color: var(--bdy);
+    background-color: var(--bdy-bg);
+}
+
+.tec {
+    border-color: var(--tec);
+    color: var(--tec);
+    background-color: var(--tec-bg);
+}
+
+.hwr {
+    border-color: var(--hwr);
+    color: var(--hwr);
+    background-color: var(--hwr-bg);
+}
+
+.focus {
+    color: var(--upgrades);
+}
 
 /* Custom styling for unselectable (disabled) options */
 option:disabled {
-    color: rgba(143, 255, 237, 0.3) !important; /* Makes the text gray */
-    background-color: hsl(168, 19%, 21%); /* Light background to visually distinguish it */
+    color: rgba(143, 255, 237, 0.3) !important;
+    /* Makes the text gray */
+    background-color: hsl(168, 19%, 21%);
+    /* Light background to visually distinguish it */
     font-style: italic;
     cursor: not-allowed;
 }

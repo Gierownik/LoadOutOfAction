@@ -1,110 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loadout Editor</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <div class="container">
-        <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">Loadout Editor</h1>
-
-        <div id="loadout-code-container"
-            style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
-            <input id="loadout-code-input" type="text" placeholder="Input Code"
-                style="flex:1;min-width:240px;padding:6px;" />
+        <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">Loadout Editor (WIP)</h1>
+        
+        <!-- NEW LOADOUT CODE SECTION -->
+        <div id="loadout-code-container" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+            <input id="loadout-code-input" type="text" placeholder="Input Code" style="flex:1;min-width:240px;padding:6px;" />
             <button id="loadout-code-apply-btn" style="padding:6px 10px;">Enter</button>
-            <input id="loadout-code-output" type="text" readonly placeholder="Generated code"
-                style="flex:1;min-width:240px;padding:6px;" />
+            <input id="loadout-code-output" type="text" readonly placeholder="Generated code" style="flex:1;min-width:240px;padding:6px;" />
         </div>
-
-        <div class="row section-header">
-            <h2>:: Matrix</h2>
-        </div>
-        <div class="matrix-container">
-            <div class="node-wrap">
-                <div id="matrix-node">
-                    Upgrades
-                    <span class="focus" id="stat-points">250</span>
-                    <span>Tier <span class="focus" id="matrix-tier">5</span></span>
-                </div>
-                <div class="matrix-arrows">
-                    <button id="tier-up" class="arrow-btn up-btn">▲</button>
-                    <button id="tier-down" class="arrow-btn down-btn">▼</button>
-                </div>
-            </div>
-
-            <div id="matrix-stats">
-                <button id="bdy-btn" class="stat-btn bdy">
-                    BDY
-                    <span id="bdy-val">0</span>
-                </button>
-                <button id="tec-btn" class="stat-btn tec">
-                    TEC
-                    <span id="tec-val">0</span>
-                </button>
-                <button id="hwr-btn" class="stat-btn hwr">
-                    HWR
-                    <span id="hwr-val">0</span>
-                </button>
-            </div>
-        </div>
-        <div class="matrix-container">
-            <span>Matrix Items Unlocked: 9</span>
-            <button id="matrix-reset-btn" class="control-btn bdy"> <span class="darker-text">></span> Reset</button>
-        </div>
-
         <div class="grid-container">
-
+            
             <div class="column left-column">
                 <div class="row section-header">
                     <h2>:: Loadout</h2>
                 </div>
-
+                
                 <div class="row">
                     <label for="shell-select">Shell:</label>
                     <select id="shell-select"></select>
                 </div>
-
+                
                 <div class="row">
                     <label for="backup-weapon-select">Backup :</label>
                     <select id="backup-weapon-select"></select>
                 </div>
-
+                
                 <div class="row">
                     <label for="device-1-select">Device 1:</label>
                     <select id="device-1-select"></select>
                 </div>
-
+                
                 <div class="row">
                     <label for="device-2-select">Device 2:</label>
                     <select id="device-2-select"></select>
                 </div>
             </div>
-
+            
             <div class="column center-column">
                 <div class="row section-header">
                     <h2>:: Augments</h2>
                 </div>
-
+                
                 <div class="row">
                     <label for="augment-1-select">Augment 1:‏‏‎ ‎</label>
                     <select id="augment-1-select"></select>
                 </div>
-
+                
                 <div class="row">
                     <label for="augment-2-select">Augment 2:</label>
                     <select id="augment-2-select"></select>
                 </div>
-
+                
                 <div class="row">
                     <label for="augment-3-select">Augment 3:</label>
                     <select id="augment-3-select"></select>
                 </div>
-
+                
                 <div class="row">
                     <label for="augment-4-select">Augment 4:</label>
                     <select id="augment-4-select"></select>
@@ -133,19 +92,19 @@
                     <select id="secondary-mod-1-select"></select>
                 </div>
                 <div class="row mod-row">
-                    <label for="secondary-mod-2-select" disabled>Mod 2:</label>
+                    <label for="secondary-mod-2-select">Mod 2:</label>
                     <select id="secondary-mod-2-select"></select>
                 </div>
                 <div class="row mod-row">
-                    <label for="secondary-mod-3-select" disabled>Mod 3:</label>
+                    <label for="secondary-mod-3-select">Mod 3:</label>
                     <select id="secondary-mod-3-select"></select>
                 </div>
                 <div class="row mod-row">
-                    <label for="secondary-mod-4-select" disabled>Mod 4:</label>
+                    <label for="secondary-mod-4-select">Mod 4:</label>
                     <select id="secondary-mod-4-select"></select>
                 </div>
             </div>
-
+            
             <div class="column weapon-column">
                 <h3>:: Primary </h3>
                 <div class="row">
@@ -178,10 +137,9 @@
                 </div>
             </div>
         </div>
-
+        
     </div>
 
     <script src="script.js"></script>
 </body>
-
 </html>

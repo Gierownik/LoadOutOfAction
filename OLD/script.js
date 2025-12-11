@@ -1,141 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const TIER_CAP = 5;
-    const STAT_CAPS = [150, 175, 200, 225, 250];
-
-    const upgradePointsEl = document.getElementById("stat-points");
-    const tierEl = document.getElementById("matrix-tier");
-    const tierUpBtn = document.getElementById("tier-up");
-    const tierDownBtn = document.getElementById("tier-down");
-
-    const bodyValueEl = document.getElementById("bdy-val");
-    const techValueEl = document.getElementById("tec-val");
-    const hardwareValueEl = document.getElementById("hwr-val");
-
-    let matrixTier = TIER_CAP;
-    let statPoints = STAT_CAPS[matrixTier - 1];
-
-    let stats = { body: 0, tech: 0, hardware: 0 };
-
-    function updatePoints() {
-        upgradePointsEl.innerText = statPoints;
-    }
-
-    function bindStat(buttonId, valueId, key) {
-        const buttonEl = document.getElementById(buttonId);
-        const valueEl = document.getElementById(valueId);
-        const holdDurationMs = 300;
-
-        let isHolding = false;
-        let holdTimeoutId = null;
-        let repeatTimeoutId = null;
-
-        function update(delta) {
-            const nextBudget = statPoints - delta;
-            const nextStat = stats[key] + delta;
-
-            if (nextBudget < 0 || nextBudget > 250) return;
-            if (nextStat < 0 || nextStat > 100) return;
-
-            statPoints = nextBudget;
-            updatePoints();
-
-            stats[key] = nextStat;
-            valueEl.textContent = stats[key];
-        }
-
-        function startHold(e) {
-            const delta = e.ctrlKey ? -1 : 1;
-
-            update(delta);
-
-            isHolding = false;
-            clearTimeout(holdTimeoutId);
-            clearTimeout(repeatTimeoutId);
-
-            let delayMs = 200;
-            const minDelayMs = 40;
-
-            function tick() {
-                if (!isHolding) return;
-
-                update(delta);
-
-                delayMs = Math.max(minDelayMs, delayMs - 15);
-                repeatTimeoutId = setTimeout(tick, delayMs);
-            }
-
-            holdTimeoutId = setTimeout(() => {
-                isHolding = true;
-                tick();
-            }, holdDurationMs);
-        }
-
-        function stopHold() {
-            isHolding = false;
-            clearTimeout(holdTimeoutId);
-            clearTimeout(repeatTimeoutId);
-        }
-
-        buttonEl.addEventListener("mousedown", startHold);
-        buttonEl.addEventListener("mouseup", stopHold);
-        buttonEl.addEventListener("mouseleave", stopHold);
-        document.addEventListener("mouseup", stopHold);
-    }
-
-    bindStat("bdy-btn", "bdy-val", "body");
-    bindStat("tec-btn", "tec-val", "tech");
-    bindStat("hwr-btn", "hwr-val", "hardware");
-
-    function updateMatrixTierButtons() {
-        tierUpBtn.disabled = false;
-        tierDownBtn.disabled = false;
-
-        if (matrixTier === TIER_CAP) {
-            tierUpBtn.disabled = true;
-        }
-
-        if (matrixTier === 1) {
-            tierDownBtn.disabled = true;
-        }
-    }
-
-    function updateMatrixTier(delta = 1) {
-        const nextTier = matrixTier + delta;
-
-        if (nextTier > TIER_CAP || nextTier < 1) {
-            return;
-        }
-
-        matrixTier = nextTier;
-        tierEl.innerText = matrixTier;
-
-        updateMatrixTierButtons();
-        resetMatrix();
-    }
-
-    function resetMatrix() {
-        console.log(JSON.stringify(stats));
-
-        stats = { body: 0, tech: 0, hardware: 0 };
-        bodyValueEl.innerText = stats.body;
-        techValueEl.innerText = stats.tech;
-        hardwareValueEl.innerText = stats.hardware;
-
-        statPoints = STAT_CAPS[matrixTier - 1];
-        updatePoints();
-    }
-
-    tierUpBtn.addEventListener("click", () => updateMatrixTier());
-    tierDownBtn.addEventListener("click", () => updateMatrixTier(-1));
-
-    document
-        .getElementById("matrix-reset-btn")
-        .addEventListener("click", resetMatrix);
-
-    updatePoints();
-    updateMatrixTierButtons();
-
     const AUGMENT_TECHNICIAN = "23";
     const AUGMENT_VERSATILE = "61";
     const AUGMENT_HEAVY_WEAPONS = "19";
@@ -147,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const DEVICE_LOCKDOWN_NAME = "Lockdown";
     const DEVICE_CASCADE_NAME = "Cascade";
     const DEVICE_PATHOGEN_NAME = "Pathogen";
-
+    
     let allAmmoData = {};
     let allWeaponsData = {};
     let allDevicesData = [];
@@ -156,44 +20,44 @@ document.addEventListener('DOMContentLoaded', () => {
     let reverseIdMaps = {};
 
     const WEAPON_CATEGORIES = {
-        "2": "secondary", // Major
-        "3": "secondary", // Deckard
-        "7": "primary", // Icarus
-        "6": "primary", // Master-Key
-        "5": "secondary", // Cerberus
-        "9": "primary", // Vigil
-        "1": "backup", // TTK
-        "8": "primary", // Custodian
-        "4": "secondary", // Geist
-        "10": "primary", // Inhibitor
-        "11": "primary", // Sentinel
-        "12": "primary", // Warrant
-        "13": "primary", // Helix
-        "14": "primary", // Nexus
-        "15": "heavy", // Umibozu
-        "16": "heavy", // Blackout
-        "17": "backup", // Akanami
-        "18": "primary", // Typhon
-        "19": "secondary", // Omen
-        "20": "heavy", // Hole-Punch
-        "21": "secondary", // Double-Tap
-        "22": "backup", // Dusters
-        "23": "backup" // Fists
+        "2":"secondary", // Major
+        "3":"secondary", // Deckard
+        "7":"primary", // Icarus
+        "6":"primary", // Master-Key
+        "5":"secondary", // Cerberus
+        "9":"primary", // Vigil
+        "1":"backup", // TTK
+        "8":"primary", // Custodian
+        "4":"secondary", // Geist
+        "10":"primary", // Inhibitor
+        "11":"primary", // Sentinel
+        "12":"primary", // Warrant
+        "13":"primary", // Helix
+        "14":"primary", // Nexus
+        "15":"heavy", // Umibozu
+        "16":"heavy", // Blackout
+        "17":"backup", // Akanami
+        "18":"primary", // Typhon
+        "19":"secondary", // Omen
+        "20":"heavy", // Hole-Punch
+        "21":"secondary", // Double-Tap
+        "22":"backup", // Dusters
+        "23":"backup" // Fists
 
     };
 
     const AUGMENT_SELECTS = ['augment-1-select', 'augment-2-select', 'augment-3-select', 'augment-4-select'];
     const DEVICE_SELECTS = ['device-1-select', 'device-2-select'];
     const WEAPON_SELECTS = ['backup-weapon-select', 'secondary-weapon-select', 'primary-weapon-select'];
-
+    
     const SECONDARY_MOD_SELECTS = ['secondary-mod-1-select', 'secondary-mod-2-select', 'secondary-mod-3-select', 'secondary-mod-4-select'];
     const PRIMARY_MOD_SELECTS = ['primary-mod-1-select', 'primary-mod-2-select', 'primary-mod-3-select', 'primary-mod-4-select'];
     let loadoutState = {
         augments: [],
         devices: [],
-        weapons: {
+        weapons: { 
             backup: "",
-            secondary: "",
+            secondary: "", 
             primary: "",
             all: []
         },
@@ -205,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isExperimental: false,
         isNeurohacker: false
     };
-
+    
     function populateSelect(selectId, dataMap) {
         const select = document.getElementById(selectId);
         if (!select) return;
@@ -214,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         select.innerHTML = '<option value=""> - </option>';
 
         const items = (Array.isArray(dataMap) ? dataMap : Object.entries(dataMap).map(([name, id]) => ({ id, name })))
-            .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name));
 
 
         items.forEach(item => {
@@ -394,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Resolved parts:', debugParts);
             console.log('Numeric string to encode:', numeric);
             console.groupEnd();
-        } catch (e) { }
+        } catch (e) {}
 
         const big = numeric ? BigInt(numeric) : 0n;
         const b64 = bigintToBase64(big);
@@ -448,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setSelectValue('augment-2-select', decoded['augment-2-select']);
         setSelectValue('augment-3-select', decoded['augment-3-select']);
         setSelectValue('augment-4-select', decoded['augment-4-select']);
-
+        
         setSelectValue('device-1-select', decoded['device-1-select']);
         setSelectValue('device-2-select', decoded['device-2-select']);
 
@@ -514,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
             //  incompatible attachments must not appear at all
             // ------------------------------
             if (!isCompatible) {
-                return;
+                return; 
             }
 
             // Only now create the option (compatible only)
@@ -584,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Store global data
             idDataGlobal = idData || {};
             // Debug: surface id.json load to console for troubleshooting
-            try { console.log('Loaded id.json keys:', Object.keys(idDataGlobal)); } catch (e) { }
+            try { console.log('Loaded id.json keys:', Object.keys(idDataGlobal)); } catch (e) {}
             allDevicesData = devicesData.map(d => ({ ...d, id: d.name })); // Use name as ID since no IDs are provided
             allAttachmentsData = attachmentsData;
 
@@ -619,26 +483,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
     }
-
+    
     /**
      * Initial data population and setup.
      */
     async function fetchAndPopulateData() {
         const data = await fetchLoadoutData();
-        if (!data) return;
+        if (!data) return; 
 
         // Store Ammo data for restriction checks
-        allAmmoData = data.Ammo;
+        allAmmoData = data.Ammo; 
 
         // --- Initial Population using fetched data ---
         populateSelect('shell-select', data.Shells);
-
+        
         AUGMENT_SELECTS.forEach(id => populateSelect(id, data.Augments));
-
+        
         // Populate devices (using names as IDs)
         populateSelect('device-1-select', allDevicesData);
         populateSelect('device-2-select', allDevicesData);
-
+        
         // Weapons (Initial call without Heavy Weapons augment)
         const allWeaponsMapNameID = data.Weapons || {};
         updateLoadoutState();
@@ -654,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSelect('primary-optic-select', data.Optics);
         populateSelect('primary-ammo-select', data.Ammo);
         PRIMARY_MOD_SELECTS.forEach(id => populateSelect(id, data.Mods));
-
+        
         // --- Add Event Listeners ---
         const allSelects = document.querySelectorAll('.container select');
         allSelects.forEach(select => {
@@ -772,16 +636,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLoadoutState() {
         // Helper to get all selected values from a list of select IDs
         const getValues = (ids) => ids.map(id => document.getElementById(id)?.value).filter(val => val);
-
+        
         loadoutState.augments = getValues(AUGMENT_SELECTS);
         loadoutState.devices = getValues(DEVICE_SELECTS);
-
+        
         const allEquippedWeapons = getValues(WEAPON_SELECTS);
-        loadoutState.weapons = {
+        loadoutState.weapons = { 
             backup: document.getElementById('backup-weapon-select')?.value || "",
             secondary: document.getElementById('secondary-weapon-select')?.value || "",
             primary: document.getElementById('primary-weapon-select')?.value || "",
-            all: allEquippedWeapons
+            all: allEquippedWeapons 
         };
 
         loadoutState.modsSecondary = getValues(SECONDARY_MOD_SELECTS);
@@ -797,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadoutState.isStudied = loadoutState.augments.includes(AUGMENT_STUDIED);
 
     }
-
+    
     /**
      * Applies all loadout restrictions.
      */
@@ -812,94 +676,94 @@ document.addEventListener('DOMContentLoaded', () => {
         // ...keep your uniqueness enforcement on weapons here (no duplicates across slots)...
 
         WEAPON_SELECTS.forEach(currentSelectId => {
-            const currentSelect = document.getElementById(currentSelectId);
-            const currentValue = currentSelect?.value;
-            if (!currentValue) return;
+             const currentSelect = document.getElementById(currentSelectId);
+             const currentValue = currentSelect?.value;
+             if (!currentValue) return;
 
-            // Always enforce weapon uniqueness
-            const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id && id !== currentValue);
-            const isDuplicate = otherSelectedWeapons.includes(currentValue);
+             // Always enforce weapon uniqueness
+             const otherSelectedWeapons = loadoutState.weapons.all.filter(id => id && id !== currentValue);
+             const isDuplicate = otherSelectedWeapons.includes(currentValue);
 
-            // Disable duplicate option in the current select
-            Array.from(currentSelect.options).forEach(option => {
-                if (option.value && option.value !== currentValue) {
-                    // Check against ALL other selected weapons in the other slots
-                    const otherWeapons = loadoutState.weapons.all.filter(id => id !== option.value);
-                    const shouldDisable = otherWeapons.includes(option.value);
-                    option.disabled = shouldDisable;
-                    option.title = shouldDisable ? 'Cannot equip multiple of the same weapon.' : '';
-                }
-            });
-
-            // Visual indication for invalid selection (e.g. if another select triggered the duplication)
-            if (isDuplicate) {
-                currentSelect.classList.add('invalid-selection');
-            } else {
-                currentSelect.classList.remove('invalid-selection');
-            }
+             // Disable duplicate option in the current select
+             Array.from(currentSelect.options).forEach(option => {
+                 if (option.value && option.value !== currentValue) {
+                     // Check against ALL other selected weapons in the other slots
+                     const otherWeapons = loadoutState.weapons.all.filter(id => id !== option.value);
+                     const shouldDisable = otherWeapons.includes(option.value);
+                     option.disabled = shouldDisable;
+                     option.title = shouldDisable ? 'Cannot equip multiple of the same weapon.' : '';
+                 }
+             });
+             
+             // Visual indication for invalid selection (e.g. if another select triggered the duplication)
+             if (isDuplicate) {
+                 currentSelect.classList.add('invalid-selection');
+             } else {
+                 currentSelect.classList.remove('invalid-selection');
+             }
         });
         function applyModRestrictions(modSelectIds) {
-            // Collect currently selected mods
-            const selectedMods = modSelectIds
-                .map(id => document.getElementById(id)?.value)
-                .filter(val => val);
+    // Collect currently selected mods
+    const selectedMods = modSelectIds
+        .map(id => document.getElementById(id)?.value)
+        .filter(val => val);
 
-            modSelectIds.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                if (!select) return;
-                const currentValue = select.value;
+    modSelectIds.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const currentValue = select.value;
 
-                Array.from(select.options).forEach(option => {
-                    if (!option.value) return; // skip placeholder
+        Array.from(select.options).forEach(option => {
+            if (!option.value) return; // skip placeholder
 
-                    const isSelectedElsewhere =
-                        selectedMods.includes(option.value) && option.value !== currentValue;
+            const isSelectedElsewhere =
+                selectedMods.includes(option.value) && option.value !== currentValue;
 
-                    option.disabled = isSelectedElsewhere;
-                    option.title = isSelectedElsewhere
-                        ? "Already equipped in another mod slot."
-                        : "";
-                });
+            option.disabled = isSelectedElsewhere;
+            option.title = isSelectedElsewhere
+                ? "Already equipped in another mod slot."
+                : "";
+        });
 
-                // Mark invalid if current selection is duplicated
-                const duplicates = selectedMods.filter(val => val === currentValue);
-                if (duplicates.length > 1) {
-                    select.classList.add("invalid-selection");
-                } else {
-                    select.classList.remove("invalid-selection");
-                }
-            });
+        // Mark invalid if current selection is duplicated
+        const duplicates = selectedMods.filter(val => val === currentValue);
+        if (duplicates.length > 1) {
+            select.classList.add("invalid-selection");
+        } else {
+            select.classList.remove("invalid-selection");
+        }
+    });
+}
+
+AUGMENT_SELECTS.forEach(selectId => {
+    const select = document.getElementById(selectId);
+    const currentValue = select.value;
+
+    Array.from(select.options).forEach(option => {
+        const augmentId = option.value;
+
+        // --- Already selected in another slot? ---
+        const otherAugments = AUGMENT_SELECTS
+            .filter(id => id !== selectId)
+            .map(id => document.getElementById(id)?.value)
+            .filter(val => val);
+
+        const alreadySelected = otherAugments.includes(augmentId);
+
+        // Apply disable
+        if (augmentId !== currentValue) {
+            option.disabled = alreadySelected;
+            option.title = alreadySelected ? 'Already equipped in another slot.' : '';
         }
 
-        AUGMENT_SELECTS.forEach(selectId => {
-            const select = document.getElementById(selectId);
-            const currentValue = select.value;
-
-            Array.from(select.options).forEach(option => {
-                const augmentId = option.value;
-
-                // --- Already selected in another slot? ---
-                const otherAugments = AUGMENT_SELECTS
-                    .filter(id => id !== selectId)
-                    .map(id => document.getElementById(id)?.value)
-                    .filter(val => val);
-
-                const alreadySelected = otherAugments.includes(augmentId);
-
-                // Apply disable
-                if (augmentId !== currentValue) {
-                    option.disabled = alreadySelected;
-                    option.title = alreadySelected ? 'Already equipped in another slot.' : '';
-                }
-
-                // Mark invalid if current selection is invalid
-                if (augmentId === currentValue && alreadySelected) {
-                    select.classList.add('invalid-selection');
-                } else if (augmentId === currentValue) {
-                    select.classList.remove('invalid-selection');
-                }
-            });
-        });
+        // Mark invalid if current selection is invalid
+        if (augmentId === currentValue && alreadySelected) {
+            select.classList.add('invalid-selection');
+        } else if (augmentId === currentValue) {
+            select.classList.remove('invalid-selection');
+        }
+    });
+});
 
         // 2. Device Augment Requirements (Neurohacker and Experimental)
         DEVICE_SELECTS.forEach(selectId => {
@@ -978,14 +842,14 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAttachmentRestrictions('primary-ammo-select', primaryWeaponName, 'Ammo');
         PRIMARY_MOD_SELECTS.forEach(id => applyAttachmentRestrictions(id, primaryWeaponName, 'Mod'));
         // Secondary mods
-        applyModRestrictions(SECONDARY_MOD_SELECTS);
+applyModRestrictions(SECONDARY_MOD_SELECTS);
 
-        // Primary mods
-        applyModRestrictions(PRIMARY_MOD_SELECTS);
+// Primary mods
+applyModRestrictions(PRIMARY_MOD_SELECTS);
 
 
     }
-
+    
     /**
      * Randomizes the entire loadout while respecting all restrictions.
      * Each field has a chance to be empty.
@@ -1025,8 +889,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Randomize Shells
         const shellSelect = document.getElementById('shell-select');
         const shellOptions = getValidOptionsFromSelect('shell-select');
-        if (shellOptions.length > 0) {
+        if (shellOptions.length > 0 && Math.random() > 0.2) {
             shellSelect.value = shellOptions[Math.floor(Math.random() * shellOptions.length)];
+        } else {
+            shellSelect.value = '';
         }
 
         // 3. Randomize Weapons (no duplicates, high chance of empty) - NOW uses filtered options
@@ -1118,14 +984,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (secondaryWeaponId) {
             const secondaryOpticOptions = getValidOptionsFromSelect('secondary-optic-select');
             const secondaryAmmoOptions = getValidOptionsFromSelect('secondary-ammo-select');
-
+            
             // Randomize optic and ammo with 20% empty chance
             if (secondaryOpticOptions.length > 0 && Math.random() > 0.2) {
                 document.getElementById('secondary-optic-select').value = secondaryOpticOptions[Math.floor(Math.random() * secondaryOpticOptions.length)];
             } else {
                 document.getElementById('secondary-optic-select').value = '';
             }
-
+            
             if (secondaryAmmoOptions.length > 0 && Math.random() > 0.2) {
                 document.getElementById('secondary-ammo-select').value = secondaryAmmoOptions[Math.floor(Math.random() * secondaryAmmoOptions.length)];
             } else {
@@ -1156,14 +1022,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (primaryWeaponId) {
             const primaryOpticOptions = getValidOptionsFromSelect('primary-optic-select');
             const primaryAmmoOptions = getValidOptionsFromSelect('primary-ammo-select');
-
+            
             // Randomize optic and ammo with 20% empty chance
             if (primaryOpticOptions.length > 0 && Math.random() > 0.2) {
                 document.getElementById('primary-optic-select').value = primaryOpticOptions[Math.floor(Math.random() * primaryOpticOptions.length)];
             } else {
                 document.getElementById('primary-optic-select').value = '';
             }
-
+            
             if (primaryAmmoOptions.length > 0 && Math.random() > 0.2) {
                 document.getElementById('primary-ammo-select').value = primaryAmmoOptions[Math.floor(Math.random() * primaryAmmoOptions.length)];
             } else {
@@ -1200,14 +1066,14 @@ document.addEventListener('DOMContentLoaded', () => {
             codeOut.value = code || '';
         }
     }
-
+    
     /**
      * Main event handler for all select changes.
      */
     function handleLoadoutChange(event) {
         // Clear any previous invalid selection visual indications before re-evaluating
         document.querySelectorAll('.invalid-selection').forEach(el => el.classList.remove('invalid-selection'));
-
+        
         applyLoadoutRestrictions();
     }
 
@@ -1217,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadLoadoutFromUrl() {
         const params = new URLSearchParams(window.location.search);
         const loadoutCode = params.get('loadout');
-
+        
         if (loadoutCode) {
             const codeInput = document.getElementById('loadout-code-input');
             if (codeInput) {
@@ -1238,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.history.replaceState({}, '', url);
         }
     }
-
+    
     // --- INITIALIZATION ---
     fetchAndPopulateData();
 
