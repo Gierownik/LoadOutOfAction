@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             stats[key] = nextStat;
             valueEl.textContent = stats[key];
+            // Re-evaluate loadout restrictions when hardware changes (affects mod slots)
+            try { if (typeof applyLoadoutRestrictions === 'function') applyLoadoutRestrictions(); } catch (e) { }
         }
 
         function startHold(e) {
@@ -143,6 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUGMENT_NEUROHACKER = "68";
     const AUGMENT_PROFESSIONAL = "50";
     const AUGMENT_STUDIED = "76";
+    const AUGMENT_SPECIALIST = "18";
+    const AUGMENT_SURPLUS = "25";
 
     const DEVICE_LOCKDOWN_NAME = "Lockdown";
     const DEVICE_CASCADE_NAME = "Cascade";
@@ -795,6 +799,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadoutState.isNeurohacker = loadoutState.augments.includes(AUGMENT_NEUROHACKER);
         loadoutState.isProfessional = loadoutState.augments.includes(AUGMENT_PROFESSIONAL);
         loadoutState.isStudied = loadoutState.augments.includes(AUGMENT_STUDIED);
+        loadoutState.isSpecialist = loadoutState.augments.includes(AUGMENT_SPECIALIST);
+        loadoutState.isSurplus = loadoutState.augments.includes(AUGMENT_SURPLUS);
 
     }
 
@@ -839,34 +845,58 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         function applyModRestrictions(modSelectIds) {
-            // Collect currently selected mods
-            const selectedMods = modSelectIds
-                .map(id => document.getElementById(id)?.value)
-                .filter(val => val);
+            // Determine how many mod slots are available for this weapon type.
+            // Base: 1 slot. +1 if Specialist augment equipped. +1 if Surplus augment equipped. +1 if Hardware > 100.
+            let allowedSlots = 1;
+            if (loadoutState.isSpecialist) allowedSlots += 1;
+            if (loadoutState.isSurplus) allowedSlots += 1;
+            if (typeof stats === 'object' && Number(stats.hardware) > 100) allowedSlots += 1;
 
-            modSelectIds.forEach(selectId => {
+            // Enable/disable selects based on allowedSlots (keep order of modSelectIds)
+            modSelectIds.forEach((selectId, idx) => {
                 const select = document.getElementById(selectId);
                 if (!select) return;
+
+                if (idx >= allowedSlots) {
+                    // Lock this mod slot
+                    select.disabled = true;
+                    select.title = 'Locked — unlock with Specialist/Surplus augments or Hardware > 100.';
+                    // Clear any selection in locked slots
+                    if (select.value) select.value = '';
+                } else {
+                    select.disabled = false;
+                    select.title = '';
+                }
+            });
+
+            // Collect currently selected mods from enabled slots only
+            const selectedMods = modSelectIds
+                .map(id => document.getElementById(id))
+                .filter(s => s && !s.disabled)
+                .map(s => s.value)
+                .filter(Boolean);
+
+            // Enforce uniqueness among enabled mod slots and mark duplicates
+            modSelectIds.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (!select || select.disabled) return;
                 const currentValue = select.value;
 
                 Array.from(select.options).forEach(option => {
                     if (!option.value) return; // skip placeholder
 
-                    const isSelectedElsewhere =
-                        selectedMods.includes(option.value) && option.value !== currentValue;
+                    const isSelectedElsewhere = selectedMods.includes(option.value) && option.value !== currentValue;
 
                     option.disabled = isSelectedElsewhere;
-                    option.title = isSelectedElsewhere
-                        ? "Already equipped in another mod slot."
-                        : "";
+                    option.title = isSelectedElsewhere ? 'Already equipped in another mod slot.' : '';
                 });
 
-                // Mark invalid if current selection is duplicated
+                // Mark invalid if current selection is duplicated among enabled slots
                 const duplicates = selectedMods.filter(val => val === currentValue);
                 if (duplicates.length > 1) {
-                    select.classList.add("invalid-selection");
+                    select.classList.add('invalid-selection');
                 } else {
-                    select.classList.remove("invalid-selection");
+                    select.classList.remove('invalid-selection');
                 }
             });
         }
