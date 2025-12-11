@@ -105,8 +105,7 @@ h3 {
 }
 
 .left-column {
-    flex: 1.5;
-    /* Give a little more space for labels */
+    flex: 1;
 }
 
 .center-column {
