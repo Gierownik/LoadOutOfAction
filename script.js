@@ -21,6 +21,46 @@ document.addEventListener('DOMContentLoaded', () => {
         upgradePointsEl.innerText = statPoints;
     }
 
+    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+    function updateMatrixGraph() {
+        const maxSegments = 10; // you have 10 SVG segments per stat
+
+        const bodySegments = Math.floor(clamp(stats.body, 0, 50) / 5);
+        const techSegments = Math.floor(clamp(stats.tech, 0, 50) / 5);
+        const hardwareSegments = Math.floor(clamp(stats.hardware, 0, 50) / 5);
+
+        // Clear all segments first
+        for (let i = 1; i <= maxSegments; i++) {
+            document.getElementById(`bdy-${i}`)?.classList.remove("body");
+            document.getElementById(`tec-${i}`)?.classList.remove("tech");
+            document.getElementById(`hwr-${i}`)?.classList.remove("hardware");
+        }
+
+        // Fill BODY segments
+        for (let i = 1; i <= bodySegments; i++) {
+            document.getElementById(`bdy-${i}`)?.classList.add("body");
+        }
+
+        // Fill TECH segments
+        for (let i = 1; i <= techSegments; i++) {
+            document.getElementById(`tec-${i}`)?.classList.add("tech");
+        }
+
+        // Fill HARDWARE segments
+        for (let i = 1; i <= hardwareSegments; i++) {
+            document.getElementById(`hwr-${i}`)?.classList.add("hardware");
+        }
+    }
+
+    function clearMatrixGraph() {
+        for (let i = 0; i < 10; i++) {
+            document.getElementById(`hwr-${i + 1}`).classList.remove("hardware")
+            document.getElementById(`bdy-${i + 1}`).classList.remove("body")
+            document.getElementById(`tec-${i + 1}`).classList.remove("tech")
+        }
+    }
+
     function bindStat(buttonId, valueId, key) {
         const buttonEl = document.getElementById(buttonId);
         const valueEl = document.getElementById(valueId);
@@ -35,10 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextStat = stats[key] + delta;
 
             if (nextBudget < 0 || nextBudget > 250) return;
-            
+
             // Check individual stat bounds: 0–150, but only ONE stat can exceed 100
             if (nextStat < 0 || nextStat > 150) return;
-            
+
             // If trying to go above 100, check if another stat is already above 100
             if (nextStat > 100) {
                 const otherStatsAbove100 = Object.entries(stats)
@@ -51,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePoints();
 
             stats[key] = nextStat;
+            updateMatrixGraph();
             valueEl.textContent = stats[key];
             // Re-evaluate loadout restrictions when hardware changes (affects mod slots)
             try { if (typeof applyLoadoutRestrictions === 'function') applyLoadoutRestrictions(); } catch (e) { }
@@ -124,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateMatrixTierButtons();
         resetMatrix();
+        clearMatrixGraph();
     }
 
     function resetMatrix() {
@@ -136,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         statPoints = STAT_CAPS[matrixTier - 1];
         updatePoints();
+        clearMatrixGraph();
     }
 
     tierUpBtn.addEventListener("click", () => updateMatrixTier());
