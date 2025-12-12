@@ -11,7 +11,7 @@
 <body>
     <div class="main-layout">
         <div class="matrix-sidebar">
-                <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">:: Matrix Editor</h1>
+            <h1 class="text-4xl font-bold text-center mb-6 text-indigo-400">:: Matrix Editor</h1>
 
             <div class="matrix-container">
                 <div class="node-wrap">
@@ -42,9 +42,114 @@
                 </div>
             </div>
             <div class="matrix-container">
-                <span>Matrix Items Unlocked: 9</span>
-                <button id="matrix-reset-btn" class="control-btn bdy"> <span class="darker-text">></span> Reset</button>
+                Matrix Items Unlocked: <span id="matrix-items-unlocked">
+                    <button id="matrix-reset-btn" class="control-btn bdy"> <span class="darker-text">></span>
+                        Reset</button>
             </div>
+            <div class="matrix-container">
+                <div id="matrix-graph">
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <svg baseProfile="full" height="400px" version="1.1" viewBox="-280 -280 560 560" width="400px"
+                        xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events"
+                        xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <defs />
+                        <line stroke="gray" stroke-width="1" transform="rotate(0)" x1="0" x2="0" y1="0" y2="200" />
+                        <line stroke="gray" stroke-width="1" transform="rotate(120)" x1="0" x2="0" y1="0" y2="200" />
+                        <line stroke="gray" stroke-width="1" transform="rotate(240)" x1="0" x2="0" y1="0" y2="200" />
+                        <polygon class="matrix-segment" id="hwr-1"
+                            points="0.0,60.0 51.96152422706631,30.000000000000007 51.96152422706632,-29.999999999999986 69.2820323027551,-39.999999999999986 69.28203230275508,40.00000000000001 0.0,80.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-2"
+                            points="0.0,80.0 69.28203230275508,40.00000000000001 69.2820323027551,-39.999999999999986 86.60254037844388,-49.99999999999998 86.60254037844386,50.000000000000014 0.0,100.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-3"
+                            points="0.0,100.0 86.60254037844386,50.000000000000014 86.60254037844388,-49.99999999999998 103.92304845413264,-59.99999999999997 103.92304845413263,60.000000000000014 0.0,120.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-4"
+                            points="0.0,120.0 103.92304845413263,60.000000000000014 103.92304845413264,-59.99999999999997 121.24355652982142,-69.99999999999997 121.2435565298214,70.00000000000001 0.0,140.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-5"
+                            points="0.0,140.0 121.2435565298214,70.00000000000001 121.24355652982142,-69.99999999999997 138.5640646055102,-79.99999999999997 138.56406460551017,80.00000000000001 0.0,160.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-6"
+                            points="0.0,160.0 138.56406460551017,80.00000000000001 138.5640646055102,-79.99999999999997 155.88457268119896,-89.99999999999996 155.88457268119896,90.00000000000001 0.0,180.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-7"
+                            points="0.0,180.0 155.88457268119896,90.00000000000001 155.88457268119896,-89.99999999999996 173.20508075688775,-99.99999999999996 173.20508075688772,100.00000000000003 0.0,200.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-8"
+                            points="0.0,200.0 173.20508075688772,100.00000000000003 173.20508075688775,-99.99999999999996 190.52558883257652,-109.99999999999996 190.5255888325765,110.00000000000003 0.0,220.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-9"
+                            points="0.0,220.0 190.5255888325765,110.00000000000003 190.52558883257652,-109.99999999999996 207.84609690826528,-119.99999999999994 207.84609690826525,120.00000000000003 0.0,240.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="hwr-10"
+                            points="0.0,240.0 207.84609690826525,120.00000000000003 207.84609690826528,-119.99999999999994 225.16660498395407,-129.99999999999994 225.16660498395404,130.00000000000003 0.0,260.0"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-1"
+                            points="51.96152422706632,-29.999999999999986 7.34788079488412e-15,-60.0 -51.961524227066306,-30.00000000000003 -69.28203230275508,-40.000000000000036 9.797174393178826e-15,-80.0 69.2820323027551,-39.999999999999986"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-2"
+                            points="69.2820323027551,-39.999999999999986 9.797174393178826e-15,-80.0 -69.28203230275508,-40.000000000000036 -86.60254037844385,-50.00000000000004 1.2246467991473532e-14,-100.0 86.60254037844388,-49.99999999999998"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-3"
+                            points="86.60254037844388,-49.99999999999998 1.2246467991473532e-14,-100.0 -86.60254037844385,-50.00000000000004 -103.92304845413261,-60.00000000000006 1.469576158976824e-14,-120.0 103.92304845413264,-59.99999999999997"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-4"
+                            points="103.92304845413264,-59.99999999999997 1.469576158976824e-14,-120.0 -103.92304845413261,-60.00000000000006 -121.24355652982139,-70.00000000000006 1.7145055188062946e-14,-140.0 121.24355652982142,-69.99999999999997"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-5"
+                            points="121.24355652982142,-69.99999999999997 1.7145055188062946e-14,-140.0 -121.24355652982139,-70.00000000000006 -138.56406460551017,-80.00000000000007 1.9594348786357652e-14,-160.0 138.5640646055102,-79.99999999999997"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-6"
+                            points="138.5640646055102,-79.99999999999997 1.9594348786357652e-14,-160.0 -138.56406460551017,-80.00000000000007 -155.88457268119893,-90.00000000000009 2.2043642384652358e-14,-180.0 155.88457268119896,-89.99999999999996"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-7"
+                            points="155.88457268119896,-89.99999999999996 2.2043642384652358e-14,-180.0 -155.88457268119893,-90.00000000000009 -173.2050807568877,-100.00000000000009 2.4492935982947064e-14,-200.0 173.20508075688775,-99.99999999999996"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-8"
+                            points="173.20508075688775,-99.99999999999996 2.4492935982947064e-14,-200.0 -173.2050807568877,-100.00000000000009 -190.52558883257646,-110.0000000000001 2.694222958124177e-14,-220.0 190.52558883257652,-109.99999999999996"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-9"
+                            points="190.52558883257652,-109.99999999999996 2.694222958124177e-14,-220.0 -190.52558883257646,-110.0000000000001 -207.84609690826522,-120.00000000000011 2.939152317953648e-14,-240.0 207.84609690826528,-119.99999999999994"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="bdy-10"
+                            points="207.84609690826528,-119.99999999999994 2.939152317953648e-14,-240.0 -207.84609690826522,-120.00000000000011 -225.16660498395402,-130.0000000000001 3.184081677783118e-14,-260.0 225.16660498395407,-129.99999999999994"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-1"
+                            points="-51.961524227066306,-30.00000000000003 -51.96152422706631,30.000000000000007 -1.469576158976824e-14,60.0 -1.9594348786357652e-14,80.0 -69.28203230275508,40.00000000000001 -69.28203230275508,-40.000000000000036"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-2"
+                            points="-69.28203230275508,-40.000000000000036 -69.28203230275508,40.00000000000001 -1.9594348786357652e-14,80.0 -2.4492935982947064e-14,100.0 -86.60254037844386,50.000000000000014 -86.60254037844385,-50.00000000000004"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-3"
+                            points="-86.60254037844385,-50.00000000000004 -86.60254037844386,50.000000000000014 -2.4492935982947064e-14,100.0 -2.939152317953648e-14,120.0 -103.92304845413263,60.000000000000014 -103.92304845413261,-60.00000000000006"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-4"
+                            points="-103.92304845413261,-60.00000000000006 -103.92304845413263,60.000000000000014 -2.939152317953648e-14,120.0 -3.429011037612589e-14,140.0 -121.2435565298214,70.00000000000001 -121.24355652982139,-70.00000000000006"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-5"
+                            points="-121.24355652982139,-70.00000000000006 -121.2435565298214,70.00000000000001 -3.429011037612589e-14,140.0 -3.9188697572715304e-14,160.0 -138.56406460551017,80.00000000000001 -138.56406460551017,-80.00000000000007"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-6"
+                            points="-138.56406460551017,-80.00000000000007 -138.56406460551017,80.00000000000001 -3.9188697572715304e-14,160.0 -4.4087284769304716e-14,180.0 -155.88457268119896,90.00000000000001 -155.88457268119893,-90.00000000000009"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-7"
+                            points="-155.88457268119893,-90.00000000000009 -155.88457268119896,90.00000000000001 -4.4087284769304716e-14,180.0 -4.898587196589413e-14,200.0 -173.20508075688772,100.00000000000003 -173.2050807568877,-100.00000000000009"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-8"
+                            points="-173.2050807568877,-100.00000000000009 -173.20508075688772,100.00000000000003 -4.898587196589413e-14,200.0 -5.388445916248354e-14,220.0 -190.5255888325765,110.00000000000003 -190.52558883257646,-110.0000000000001"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-9"
+                            points="-190.52558883257646,-110.0000000000001 -190.5255888325765,110.00000000000003 -5.388445916248354e-14,220.0 -5.878304635907296e-14,240.0 -207.84609690826525,120.00000000000003 -207.84609690826522,-120.00000000000011"
+                            stroke="gray" stroke-width="1" />
+                        <polygon class="matrix-segment" id="tec-10"
+                            points="-207.84609690826522,-120.00000000000011 -207.84609690826525,120.00000000000003 -5.878304635907296e-14,240.0 -6.368163355566237e-14,260.0 -225.16660498395404,130.00000000000003 -225.16660498395402,-130.0000000000001"
+                            stroke="gray" stroke-width="1" />
+                    </svg>
+                </div>
+            </div>
+
         </div>
 
         <div class="container">
@@ -59,127 +164,127 @@
                     style="flex:1;min-width:240px;padding:6px;" />
             </div>
 
-        <div class="grid-container">
+            <div class="grid-container">
 
-            <div class="column left-column">
-                <div class="row section-header">
-                    <h2>:: Loadout</h2>
+                <div class="column left-column">
+                    <div class="row section-header">
+                        <h2>:: Loadout</h2>
+                    </div>
+
+                    <div class="row">
+                        <label for="shell-select">Shell:</label>
+                        <select id="shell-select"></select>
+                    </div>
+
+                    <div class="row">
+                        <label for="backup-weapon-select">Backup :</label>
+                        <select id="backup-weapon-select"></select>
+                    </div>
+
+                    <div class="row">
+                        <label for="device-1-select">Device 1:</label>
+                        <select id="device-1-select"></select>
+                    </div>
+
+                    <div class="row">
+                        <label for="device-2-select">Device 2:</label>
+                        <select id="device-2-select"></select>
+                    </div>
                 </div>
 
-                <div class="row">
-                    <label for="shell-select">Shell:</label>
-                    <select id="shell-select"></select>
-                </div>
+                <div class="column center-column">
+                    <div class="row section-header">
+                        <h2>:: Augments</h2>
+                    </div>
 
-                <div class="row">
-                    <label for="backup-weapon-select">Backup :</label>
-                    <select id="backup-weapon-select"></select>
-                </div>
+                    <div class="row">
+                        <label for="augment-1-select">Augment 1:‏‏‎ ‎</label>
+                        <select id="augment-1-select"></select>
+                    </div>
 
-                <div class="row">
-                    <label for="device-1-select">Device 1:</label>
-                    <select id="device-1-select"></select>
-                </div>
+                    <div class="row">
+                        <label for="augment-2-select">Augment 2:</label>
+                        <select id="augment-2-select"></select>
+                    </div>
 
-                <div class="row">
-                    <label for="device-2-select">Device 2:</label>
-                    <select id="device-2-select"></select>
+                    <div class="row">
+                        <label for="augment-3-select">Augment 3:</label>
+                        <select id="augment-3-select"></select>
+                    </div>
+
+                    <div class="row">
+                        <label for="augment-4-select">Augment 4:</label>
+                        <select id="augment-4-select"></select>
+                    </div>
                 </div>
             </div>
 
-            <div class="column center-column">
-                <div class="row section-header">
-                    <h2>:: Augments</h2>
+
+            <div class="grid-container weapons-container">
+                <div class="column weapon-column">
+                    <h3>:: Sidearm </h3>
+                    <div class="row">
+                        <label for="secondary-weapon-select">Weapon:</label>
+                        <select id="secondary-weapon-select"></select>
+                    </div>
+                    <div class="row">
+                        <label for="secondary-optic-select">Optic:</label>
+                        <select id="secondary-optic-select"></select>
+                    </div>
+                    <div class="row">
+                        <label for="secondary-ammo-select">Ammo:</label>
+                        <select id="secondary-ammo-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="secondary-mod-1-select">Mod 1:</label>
+                        <select id="secondary-mod-1-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="secondary-mod-2-select" disabled>Mod 2:</label>
+                        <select id="secondary-mod-2-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="secondary-mod-3-select" disabled>Mod 3:</label>
+                        <select id="secondary-mod-3-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="secondary-mod-4-select" disabled>Mod 4:</label>
+                        <select id="secondary-mod-4-select"></select>
+                    </div>
                 </div>
 
-                <div class="row">
-                    <label for="augment-1-select">Augment 1:‏‏‎ ‎</label>
-                    <select id="augment-1-select"></select>
-                </div>
-
-                <div class="row">
-                    <label for="augment-2-select">Augment 2:</label>
-                    <select id="augment-2-select"></select>
-                </div>
-
-                <div class="row">
-                    <label for="augment-3-select">Augment 3:</label>
-                    <select id="augment-3-select"></select>
-                </div>
-
-                <div class="row">
-                    <label for="augment-4-select">Augment 4:</label>
-                    <select id="augment-4-select"></select>
+                <div class="column weapon-column">
+                    <h3>:: Primary </h3>
+                    <div class="row">
+                        <label for="primary-weapon-select">Weapon:</label>
+                        <select id="primary-weapon-select"></select>
+                    </div>
+                    <div class="row">
+                        <label for="primary-optic-select">Optic:</label>
+                        <select id="primary-optic-select"></select>
+                    </div>
+                    <div class="row">
+                        <label for="primary-ammo-select">Ammo:</label>
+                        <select id="primary-ammo-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="primary-mod-1-select">Mod 1:</label>
+                        <select id="primary-mod-1-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="primary-mod-2-select">Mod 2:</label>
+                        <select id="primary-mod-2-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="primary-mod-3-select">Mod 3:</label>
+                        <select id="primary-mod-3-select"></select>
+                    </div>
+                    <div class="row mod-row">
+                        <label for="primary-mod-4-select">Mod 4:</label>
+                        <select id="primary-mod-4-select"></select>
+                    </div>
                 </div>
             </div>
-        </div>
-
-
-        <div class="grid-container weapons-container">
-            <div class="column weapon-column">
-                <h3>:: Sidearm </h3>
-                <div class="row">
-                    <label for="secondary-weapon-select">Weapon:</label>
-                    <select id="secondary-weapon-select"></select>
-                </div>
-                <div class="row">
-                    <label for="secondary-optic-select">Optic:</label>
-                    <select id="secondary-optic-select"></select>
-                </div>
-                <div class="row">
-                    <label for="secondary-ammo-select">Ammo:</label>
-                    <select id="secondary-ammo-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="secondary-mod-1-select">Mod 1:</label>
-                    <select id="secondary-mod-1-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="secondary-mod-2-select" disabled>Mod 2:</label>
-                    <select id="secondary-mod-2-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="secondary-mod-3-select" disabled>Mod 3:</label>
-                    <select id="secondary-mod-3-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="secondary-mod-4-select" disabled>Mod 4:</label>
-                    <select id="secondary-mod-4-select"></select>
-                </div>
-            </div>
-
-            <div class="column weapon-column">
-                <h3>:: Primary </h3>
-                <div class="row">
-                    <label for="primary-weapon-select">Weapon:</label>
-                    <select id="primary-weapon-select"></select>
-                </div>
-                <div class="row">
-                    <label for="primary-optic-select">Optic:</label>
-                    <select id="primary-optic-select"></select>
-                </div>
-                <div class="row">
-                    <label for="primary-ammo-select">Ammo:</label>
-                    <select id="primary-ammo-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="primary-mod-1-select">Mod 1:</label>
-                    <select id="primary-mod-1-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="primary-mod-2-select">Mod 2:</label>
-                    <select id="primary-mod-2-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="primary-mod-3-select">Mod 3:</label>
-                    <select id="primary-mod-3-select"></select>
-                </div>
-                <div class="row mod-row">
-                    <label for="primary-mod-4-select">Mod 4:</label>
-                    <select id="primary-mod-4-select"></select>
-                </div>
-            </div>
-        </div>
 
         </div>
 
