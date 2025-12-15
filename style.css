@@ -17,8 +17,6 @@
     --matrix-bg: #454344;
 
     --upgrades: #FFCF5C;
-
-    --notchSize: 50em;
 }
 
 .orbitron {
@@ -323,6 +321,26 @@ select option:first-child {
     color: var(--upgrades);
 }
 
+#matrix-graph {
+    scale: 120%;
+}
+
+.matrix-segment {
+    fill: none;
+}
+
+.matrix-segment.body {
+    fill: var(--bdy);
+}
+
+.matrix-segment.tech {
+    fill: var(--tec);
+}
+
+.matrix-segment.hardware {
+    fill: var(--hwr);
+}
+
 option:disabled {
     color: rgba(143, 255, 237, 0.3) !important;
     background-color: hsl(168, 19%, 21%);
@@ -338,6 +356,6 @@ select:disabled {
     cursor: not-allowed;
 }
 
-select:disabled + .disabled-note {
+select:disabled+.disabled-note {
     display: inline-block;
 }
