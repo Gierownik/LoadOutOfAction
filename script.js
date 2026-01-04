@@ -954,16 +954,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Disable 4th augment slot if tier < 4
+        // Disable 4th augment slot unless Tech >= 100 (unlocked at Tech >= 100)
         const augment4Select = document.getElementById('augment-4-select');
         if (augment4Select) {
-            if (matrixTier < 4) {
-                augment4Select.disabled = true;
-                augment4Select.title = 'Unlock at Matrix Tier 4 or higher.';
-                if (augment4Select.value) augment4Select.value = '';
-            } else {
+            // Enable only when tech stat is 100 or higher
+            if (typeof stats === 'object' && Number(stats.tech) >= 100) {
                 augment4Select.disabled = false;
                 augment4Select.title = '';
+            } else {
+                augment4Select.disabled = true;
+                augment4Select.title = 'Unlock at Tech 100.';
+                if (augment4Select.value) augment4Select.value = '';
             }
         }
 
