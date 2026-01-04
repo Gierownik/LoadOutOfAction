@@ -359,3 +359,11 @@ select:disabled {
 select:disabled+.disabled-note {
     display: inline-block;
 }
+
+hr {
+    border-color: rgba(143, 255, 237, 0.85);
+}
+
+.numberdispl {
+    color: rgba(143, 255, 237, 0.5);
+}
